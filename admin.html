@@ -1,0 +1,1658 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f19">
+  <title>MITS ONE — Admin Login Activity Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --bg-elevated: #111827;
+      --surface: #141f36;
+      --surface-hover: #1b2947;
+      --surface-glass: rgba(20, 31, 54, 0.78);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+
+      --brand-from: #7c3aed;
+      --brand-to: #a855f7;
+      --brand-glow: rgba(124, 58, 237, 0.35);
+      --brand-subtle: rgba(124, 58, 237, 0.14);
+
+      --ok: #10b981;
+      --ok-glow: rgba(16, 185, 129, 0.25);
+      --ok-subtle: rgba(16, 185, 129, 0.12);
+
+      --bad: #ef4444;
+      --bad-glow: rgba(239, 68, 68, 0.25);
+      --bad-subtle: rgba(239, 68, 68, 0.12);
+
+      --warn: #f59e0b;
+      --warn-subtle: rgba(245, 158, 11, 0.12);
+
+      --info: #06b6d4;
+      --info-subtle: rgba(6, 182, 212, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+      --shadow-md: 0 8px 24px -4px rgba(0,0,0,0.35);
+      --shadow-lg: 0 20px 40px -8px rgba(0,0,0,0.5);
+
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+
+    /* Layout Wrapper */
+    .admin-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 22px 60px;
+    }
+
+    /* Ambient Glow */
+    .ambient-glow {
+      position: fixed;
+      top: -180px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 900px;
+      height: 420px;
+      background: radial-gradient(circle, var(--brand-glow) 0%, transparent 70%);
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ── HEADER ───────────────────────────────────────────────────────────── */
+    header.admin-header {
+      position: sticky;
+      top: 14px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px 20px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      display: grid;
+      place-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 19px;
+      box-shadow: 0 4px 14px var(--brand-glow);
+    }
+    .brand-text h1 {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--brand-subtle);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      font-family: var(--font-mono);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ok);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: var(--ok-subtle);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 10px var(--ok);
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .btn-header {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-header:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+    .btn-header svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .btn-danger {
+      color: var(--bad);
+      background: var(--bad-subtle);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .btn-danger:hover {
+      background: var(--bad);
+      color: #fff;
+    }
+
+    /* ── AUTH CARD (WHEN NOT SIGNED IN) ──────────────────────────────────── */
+    .auth-wrapper {
+      max-width: 440px;
+      margin: 12vh auto 0;
+      position: relative;
+      z-index: 10;
+    }
+    .card-glass {
+      background: var(--surface-glass);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-glass::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand-from), var(--brand-to));
+    }
+    .auth-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .auth-icon-wrap {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      display: grid;
+      place-content: center;
+      box-shadow: 0 6px 20px var(--brand-glow);
+      color: #fff;
+    }
+    .auth-icon-wrap svg { width: 26px; height: 26px; }
+    .auth-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+    .auth-header p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-faint);
+      pointer-events: none;
+      display: grid;
+      place-content: center;
+    }
+    .input-icon svg { width: 17px; height: 17px; }
+    .admin-input {
+      width: 100%;
+      height: 44px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 42px 0 38px;
+      color: var(--text-main);
+      font-size: 14px;
+      font-family: var(--font-mono);
+      transition: all 0.2s ease;
+    }
+    .admin-input:focus {
+      border-color: var(--brand-from);
+      box-shadow: 0 0 0 3px var(--brand-subtle);
+      background: var(--surface);
+    }
+    .input-suffix-btn {
+      position: absolute;
+      right: 10px;
+      color: var(--text-faint);
+      padding: 6px;
+      cursor: pointer;
+    }
+    .input-suffix-btn:hover { color: var(--text-muted); }
+
+    .btn-primary {
+      width: 100%;
+      height: 46px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      color: #fff;
+      font-weight: 700;
+      font-size: 14.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 18px var(--brand-glow);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled { opacity: 0.65; cursor: wait; }
+
+    .alert-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bad-subtle);
+      border: 1px solid var(--bad);
+      color: var(--bad);
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .alert-box svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+
+    /* ── DASHBOARD KPIS ───────────────────────────────────────────────────── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+    }
+    .kpi-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--border);
+    }
+    .kpi-card.kpi-purple::before { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+    .kpi-card.kpi-green::before { background: var(--ok); }
+    .kpi-card.kpi-red::before { background: var(--bad); }
+    .kpi-card.kpi-blue::before { background: var(--info); }
+    .kpi-card.kpi-yellow::before { background: var(--warn); }
+
+    .kpi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-content: center;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+    }
+    .kpi-icon svg { width: 16px; height: 16px; }
+    .kpi-number {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.1;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ── FILTER & TOOLBAR ─────────────────────────────────────────────────── */
+    .toolbar-deck {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .search-box {
+      position: relative;
+      min-width: 240px;
+      flex: 1;
+      max-width: 340px;
+    }
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-faint);
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      color: var(--text-main);
+      font-size: 13.5px;
+      transition: all 0.2s ease;
+    }
+    .search-input:focus {
+      border-color: var(--brand-from);
+      background: var(--surface);
+    }
+
+    .select-dropdown, .date-input {
+      height: 38px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 12px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .select-dropdown:focus, .date-input:focus {
+      border-color: var(--brand-from);
+    }
+
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-action:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn-action svg { width: 15px; height: 15px; }
+
+    .btn-purple {
+      background: var(--brand-subtle);
+      border-color: var(--brand-from);
+      color: #c084fc;
+    }
+    .btn-purple:hover {
+      background: var(--brand-from);
+      color: #fff;
+    }
+
+    /* ── TABS ─────────────────────────────────────────────────────────────── */
+    .view-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+    .view-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .view-tab-btn:hover {
+      color: var(--text-main);
+      background: var(--surface);
+    }
+    .view-tab-btn.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      box-shadow: 0 4px 14px var(--brand-glow);
+    }
+    .tab-counter {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ── TABLE CONTAINER ──────────────────────────────────────────────────── */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+    table.data-table th {
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+    table.data-table tr:last-child td {
+      border-bottom: none;
+    }
+    table.data-table tr:hover td {
+      background: var(--surface-hover);
+    }
+
+    .roll-pill {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      color: #c084fc;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .roll-pill:hover {
+      background: var(--brand-subtle);
+      border-color: var(--brand-from);
+      color: #fff;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-success {
+      background: var(--ok-subtle);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-failed {
+      background: var(--bad-subtle);
+      color: var(--bad);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .badge-active {
+      background: var(--ok-subtle);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .device-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+    }
+    .device-main {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .device-sub {
+      color: var(--text-faint);
+      font-size: 11px;
+    }
+
+    .time-cell {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── PAGINATION ───────────────────────────────────────────────────────── */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-btn {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .page-btn:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ── MODAL (STUDENT HISTORY) ─────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      display: grid;
+      place-content: center;
+      padding: 20px;
+    }
+    .modal-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 780px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      display: grid;
+      place-content: center;
+      transition: all 0.2s ease;
+    }
+    .modal-close-btn:hover {
+      color: var(--text-main);
+      background: var(--surface-hover);
+    }
+
+    /* ── TOAST NOTIFICATIONS ──────────────────────────────────────────────── */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast-item {
+      pointer-events: auto;
+      background: var(--surface-glass);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      box-shadow: var(--shadow-lg);
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes toastSlide {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state svg {
+      width: 42px;
+      height: 42px;
+      color: var(--text-faint);
+      margin-bottom: 12px;
+    }
+
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Mobile Adaptations */
+    @media (max-width: 768px) {
+      .admin-container { padding: 12px 12px 60px; }
+      header.admin-header { padding: 10px 14px; margin-bottom: 16px; }
+      .brand-text h1 { font-size: 15px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .toolbar-deck { flex-direction: column; align-items: stretch; }
+      .filter-group { flex-direction: column; align-items: stretch; }
+      .search-box { max-width: 100%; min-width: 100%; }
+      .action-group { justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow -->
+  <div class="ambient-glow"></div>
+
+  <div class="admin-container">
+
+    <!-- ── GLOBAL HEADER ─────────────────────────────────────────────────── -->
+    <header class="admin-header">
+      <div class="brand-group">
+        <div class="brand-badge-logo">M</div>
+        <div class="brand-text">
+          <h1>MITS ONE <span class="brand-tag">ADMIN</span></h1>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live status -->
+        <div id="liveBadge" class="live-indicator" hidden>
+          <span class="live-dot"></span>
+          <span>Live Monitoring</span>
+        </div>
+
+        <!-- Refresh Button -->
+        <button id="refreshBtn" class="btn-header" title="Refresh Dashboard Data" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <span class="desktop-text">Refresh</span>
+        </button>
+
+        <!-- Logout Button -->
+        <button id="logoutBtn" class="btn-header btn-danger" title="Sign out from admin panel" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="desktop-text">Sign Out</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── UNAUTHENTICATED: ADMIN SIGN-IN VIEW ─────────────────────────────── -->
+    <section id="authView" class="auth-wrapper">
+      <div class="card-glass">
+        <div class="auth-header">
+          <div class="auth-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h2>Admin Authentication</h2>
+          <p>Enter the administrator secret token to monitor live student login activity.</p>
+        </div>
+
+        <form id="adminLoginForm">
+          <div class="form-group">
+            <label class="form-label" for="adminTokenInput">Admin Secret Token</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </span>
+              <input id="adminTokenInput" class="admin-input" type="password" placeholder="Enter MITS_ADMIN_TOKEN" autocomplete="current-password" required>
+              <button type="button" id="toggleTokenVisibility" class="input-suffix-btn" title="Show or hide token">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <button id="authSubmitBtn" class="btn-primary" type="submit">
+            <span>Unlock Admin Dashboard</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <div id="authAlertBox" class="alert-box" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="authAlertText"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ── AUTHENTICATED: DASHBOARD VIEW ──────────────────────────────────── -->
+    <main id="dashboardView" hidden>
+
+      <!-- KPI Deck -->
+      <section class="kpi-grid">
+        <!-- 1. Total Attempts -->
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-header">
+            <span>Total Attempts</span>
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            </div>
+          </div>
+          <div id="statTotalAttempts" class="kpi-number">0</div>
+          <div class="kpi-sub">All time login events</div>
+        </div>
+
+        <!-- 2. Successful Logins -->
+        <div class="kpi-card kpi-green">
+          <div class="kpi-header">
+            <span>Successful Logins</span>
+            <div class="kpi-icon" style="color:var(--ok);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+          </div>
+          <div id="statSuccessfulLogins" class="kpi-number text-ok">0</div>
+          <div class="kpi-sub">Authenticated via GEMS</div>
+        </div>
+
+        <!-- 3. Failed Logins -->
+        <div class="kpi-card kpi-red">
+          <div class="kpi-header">
+            <span>Failed Logins</span>
+            <div class="kpi-icon" style="color:var(--bad);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+          </div>
+          <div id="statFailedLogins" class="kpi-number text-bad">0</div>
+          <div class="kpi-sub">Invalid credentials</div>
+        </div>
+
+        <!-- 4. Unique Students -->
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-header">
+            <span>Unique Students</span>
+            <div class="kpi-icon" style="color:var(--info);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+          </div>
+          <div id="statUniqueStudents" class="kpi-number">0</div>
+          <div class="kpi-sub">Distinct college roll numbers</div>
+        </div>
+
+        <!-- 5. Active Sessions -->
+        <div class="kpi-card kpi-green">
+          <div class="kpi-header">
+            <span>Active Sessions</span>
+            <div class="kpi-icon" style="color:var(--ok);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/></svg>
+            </div>
+          </div>
+          <div id="statActiveSessions" class="kpi-number" style="color:var(--ok);">0</div>
+          <div class="kpi-sub">Heartbeat within past 5m</div>
+        </div>
+
+        <!-- 6. Students Today -->
+        <div class="kpi-card kpi-yellow">
+          <div class="kpi-header">
+            <span>Logged In Today</span>
+            <div class="kpi-icon" style="color:var(--warn);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+          </div>
+          <div id="statStudentsToday" class="kpi-number">0</div>
+          <div class="kpi-sub">Students active today (IST)</div>
+        </div>
+      </section>
+
+      <!-- View Selector Tabs -->
+      <div class="view-tabs">
+        <button id="tabActivityBtn" class="view-tab-btn active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Login Activity History</span>
+          <span id="tabActivityCount" class="tab-counter">0</span>
+        </button>
+
+        <button id="tabSessionsBtn" class="view-tab-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"/></svg>
+          <span>Currently Active Sessions</span>
+          <span id="tabSessionsCount" class="tab-counter">0</span>
+        </button>
+      </div>
+
+      <!-- Toolbar & Filters Deck -->
+      <section class="toolbar-deck">
+        <div class="filter-group">
+          <!-- Search input -->
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="searchInput" class="search-input" type="text" placeholder="Search roll number or name...">
+          </div>
+
+          <!-- Status filter -->
+          <select id="statusFilter" class="select-dropdown">
+            <option value="">All Statuses</option>
+            <option value="SUCCESS">Success Only</option>
+            <option value="FAILED">Failed Only</option>
+          </select>
+
+          <!-- Date filter -->
+          <input id="dateFilter" class="date-input" type="date" title="Filter by date (IST)">
+
+          <!-- Sort filter -->
+          <select id="sortFilter" class="select-dropdown">
+            <option value="latest">Latest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+
+          <!-- Reset filters -->
+          <button id="resetFiltersBtn" class="btn-action" title="Clear all filters">
+            <span>Reset</span>
+          </button>
+        </div>
+
+        <div class="action-group">
+          <!-- Export CSV -->
+          <button id="exportCsvBtn" class="btn-action btn-purple" title="Export full login activity history to CSV">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── VIEW 1: LOGIN ACTIVITY TABLE ───────────────────────────────── -->
+      <section id="activityViewContainer">
+        <div class="table-container">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Roll Number</th>
+                  <th>Student Name</th>
+                  <th>Login Time (IST)</th>
+                  <th>Status</th>
+                  <th>Device &amp; Browser</th>
+                  <th>Last Active (IST)</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="activityTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Bar -->
+          <div class="pagination-bar">
+            <div>
+              Showing <span id="pageShowingStart">0</span> to <span id="pageShowingEnd">0</span> of <span id="pageTotalItems">0</span> events
+            </div>
+
+            <div class="pagination-controls">
+              <label for="pageSizeSelect" style="font-size:12px;margin-right:6px;">Page size:</label>
+              <select id="pageSizeSelect" class="select-dropdown" style="height:32px;padding:0 6px;">
+                <option value="15">15</option>
+                <option value="25" selected>25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+
+              <button id="prevPageBtn" class="page-btn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="15 18 9 12 15 6"/></svg>
+                <span>Prev</span>
+              </button>
+
+              <span id="pageIndicator" style="font-family:var(--font-mono);font-size:12px;padding:0 6px;">Page 1 of 1</span>
+
+              <button id="nextPageBtn" class="page-btn" disabled>
+                <span>Next</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── VIEW 2: ACTIVE SESSIONS TABLE ──────────────────────────────── -->
+      <section id="sessionsViewContainer" hidden>
+        <div class="table-container">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Roll Number</th>
+                  <th>Student Name</th>
+                  <th>Session ID</th>
+                  <th>Login Time (IST)</th>
+                  <th>Last Active (IST)</th>
+                  <th>Idle Status</th>
+                  <th>Session Duration</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sessionsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── STUDENT HISTORY MODAL ─────────────────────────────────────────── -->
+    <div id="studentHistoryModal" class="modal-overlay" hidden>
+      <div class="modal-dialog">
+        <button id="modalCloseBtn" class="modal-close-btn" title="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+
+        <div style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:16px;">
+          <h2 style="font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;">
+            <span id="modalRollNumber">—</span>
+            <span id="modalStudentName" style="color:var(--text-muted);font-size:15px;font-weight:600;">—</span>
+          </h2>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:4px;">
+            Comprehensive login and active session timeline for this student.
+          </p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+          <div style="background:var(--bg-elevated);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Recent Logins</div>
+            <div id="modalLoginCount" style="font-size:22px;font-weight:800;margin-top:4px;">0</div>
+          </div>
+          <div style="background:var(--bg-elevated);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Recorded Sessions</div>
+            <div id="modalSessionCount" style="font-size:22px;font-weight:800;margin-top:4px;">0</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <h4 style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Login Attempts History</h4>
+          <div id="modalEventsList" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Recorded Sessions Timeline</h4>
+          <div id="modalSessionsList" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <!-- ── APPLICATION CLIENT SCRIPT ──────────────────────────────────────── -->
+  <script>
+    (function () {
+      'use strict';
+
+      const state = {
+        authenticated: false,
+        activeTab: 'activity', // 'activity' | 'sessions'
+        page: 1,
+        limit: 25,
+        search: '',
+        status: '',
+        dateFilter: '',
+        sort: 'latest',
+        autoRefreshInterval: null
+      };
+
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
+
+      function showToast(message, type = 'info') {
+        const container = $('#toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast-item';
+        const color = type === 'ok' ? 'var(--ok)' : type === 'bad' ? 'var(--bad)' : 'var(--brand-from)';
+        toast.innerHTML = `<span style="color:${color};font-size:16px;">●</span><span>${escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          toast.style.transition = 'all 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3200);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ── AUTHENTICATION ───────────────────────────────────────────────────
+      async function checkAuthStatus() {
+        try {
+          const res = await fetch('/api/admin/me');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.authenticated) {
+              setAuthenticatedState(true);
+              return;
+            }
+          }
+        } catch (e) {}
+        setAuthenticatedState(false);
+      }
+
+      function setAuthenticatedState(isAuthed) {
+        state.authenticated = isAuthed;
+        $('#authView').hidden = isAuthed;
+        $('#dashboardView').hidden = !isAuthed;
+        $('#liveBadge').hidden = !isAuthed;
+        $('#refreshBtn').hidden = !isAuthed;
+        $('#logoutBtn').hidden = !isAuthed;
+
+        if (isAuthed) {
+          loadAllData();
+          startAutoRefresh();
+        } else {
+          stopAutoRefresh();
+        }
+      }
+
+      $('#adminLoginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const token = $('#adminTokenInput').value.trim();
+        const submitBtn = $('#authSubmitBtn');
+        const alertBox = $('#authAlertBox');
+        const alertText = $('#authAlertText');
+
+        if (!token) return;
+        submitBtn.disabled = true;
+        alertBox.hidden = true;
+
+        try {
+          const res = await fetch('/api/admin/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+          });
+          const data = await res.json().catch(() => ({}));
+
+          if (res.ok && data.success) {
+            showToast('Authenticated as Administrator!', 'ok');
+            $('#adminTokenInput').value = '';
+            setAuthenticatedState(true);
+          } else {
+            alertText.textContent = data.error || 'Authentication failed. Please verify MITS_ADMIN_TOKEN.';
+            alertBox.hidden = false;
+          }
+        } catch (err) {
+          alertText.textContent = 'Connection error. Please try again.';
+          alertBox.hidden = false;
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+
+      $('#toggleTokenVisibility').addEventListener('click', () => {
+        const input = $('#adminTokenInput');
+        input.type = input.type === 'password' ? 'text' : 'password';
+      });
+
+      $('#logoutBtn').addEventListener('click', async () => {
+        try {
+          await fetch('/api/admin/logout', { method: 'POST' });
+        } catch (e) {}
+        showToast('Signed out of Admin Dashboard', 'ok');
+        setAuthenticatedState(false);
+      });
+
+      // ── DATA FETCHING ────────────────────────────────────────────────────
+      async function loadAllData() {
+        if (!state.authenticated) return;
+        const refreshIcon = $('#refreshBtn svg');
+        if (refreshIcon) refreshIcon.classList.add('spin');
+
+        await Promise.allSettled([
+          fetchStats(),
+          state.activeTab === 'activity' ? fetchActivity() : fetchActiveSessions()
+        ]);
+
+        if (refreshIcon) refreshIcon.classList.remove('spin');
+      }
+
+      async function fetchStats() {
+        try {
+          const res = await fetch('/api/admin/stats');
+          if (res.status === 401) { setAuthenticatedState(false); return; }
+          const stats = await res.json();
+
+          $('#statTotalAttempts').textContent = Number(stats.total_attempts || 0).toLocaleString();
+          $('#statSuccessfulLogins').textContent = Number(stats.successful_logins || 0).toLocaleString();
+          $('#statFailedLogins').textContent = Number(stats.failed_logins || 0).toLocaleString();
+          $('#statUniqueStudents').textContent = Number(stats.unique_students || 0).toLocaleString();
+          $('#statActiveSessions').textContent = Number(stats.active_sessions || 0).toLocaleString();
+          $('#statStudentsToday').textContent = Number(stats.students_today || 0).toLocaleString();
+
+          $('#tabSessionsCount').textContent = stats.active_sessions || 0;
+        } catch (e) {
+          console.error('Failed to load stats:', e);
+        }
+      }
+
+      async function fetchActivity() {
+        const tbody = $('#activityTableBody');
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Loading login activity records...</td></tr>';
+
+        const params = new URLSearchParams({
+          page: state.page,
+          limit: state.limit,
+          search: state.search,
+          status: state.status,
+          date: state.dateFilter,
+          sort: state.sort
+        });
+
+        try {
+          const res = await fetch(`/api/admin/login-activity?${params.toString()}`);
+          if (res.status === 401) { setAuthenticatedState(false); return; }
+          const data = await res.json();
+          renderActivityTable(data);
+        } catch (e) {
+          tbody.innerHTML = '<tr><td colspan="7" class="empty-state text-bad">Failed to load login activity.</td></tr>';
+        }
+      }
+
+      function renderActivityTable(data) {
+        const tbody = $('#activityTableBody');
+        tbody.innerHTML = '';
+        const events = data.events || [];
+        const pag = data.pagination || { total: 0, page: 1, limit: 25, totalPages: 1 };
+
+        $('#tabActivityCount').textContent = pag.total;
+
+        if (events.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No matching student login records found.</td></tr>';
+          updatePagination(pag, 0);
+          return;
+        }
+
+        events.forEach(ev => {
+          const isSuccess = ev.login_status === 'SUCCESS';
+          const badgeHtml = isSuccess
+            ? '<span class="status-badge badge-success">✓ Success</span>'
+            : `<span class="status-badge badge-failed" title="${escapeHtml(ev.failure_reason)}">✕ Failed</span>${ev.failure_reason ? `<div style="font-size:11px;color:var(--bad);margin-top:3px;">${escapeHtml(ev.failure_reason)}</div>` : ''}`;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <span class="roll-pill" data-roll="${escapeHtml(ev.roll_number)}" title="Click to view full student history">${escapeHtml(ev.roll_number)}</span>
+            </td>
+            <td>
+              <span style="font-weight:600;">${escapeHtml(ev.student_name)}</span>
+            </td>
+            <td class="time-cell">
+              ${escapeHtml(ev.created_at_display)}
+            </td>
+            <td>
+              ${badgeHtml}
+            </td>
+            <td>
+              <div class="device-info">
+                <span class="device-main">${escapeHtml(ev.device)}</span>
+                <span class="device-sub">${escapeHtml(ev.browser)}</span>
+              </div>
+            </td>
+            <td class="time-cell">
+              ${escapeHtml(ev.last_active_display)}
+            </td>
+            <td>
+              <button class="btn-action" data-roll="${escapeHtml(ev.roll_number)}" style="height:28px;padding:0 8px;font-size:11.5px;">History</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        updatePagination(pag, events.length);
+      }
+
+      function updatePagination(pag, currentCount) {
+        const start = pag.total === 0 ? 0 : (pag.page - 1) * pag.limit + 1;
+        const end = pag.total === 0 ? 0 : start + currentCount - 1;
+
+        $('#pageShowingStart').textContent = start;
+        $('#pageShowingEnd').textContent = end;
+        $('#pageTotalItems').textContent = pag.total;
+        $('#pageIndicator').textContent = `Page ${pag.page} of ${Math.max(1, pag.totalPages)}`;
+
+        $('#prevPageBtn').disabled = (pag.page <= 1);
+        $('#nextPageBtn').disabled = (pag.page >= pag.totalPages);
+      }
+
+      async function fetchActiveSessions() {
+        const tbody = $('#sessionsTableBody');
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">Loading active student sessions...</td></tr>';
+
+        try {
+          const res = await fetch('/api/admin/active-sessions');
+          if (res.status === 401) { setAuthenticatedState(false); return; }
+          const sessions = await res.json();
+          renderSessionsTable(sessions);
+        } catch (e) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty-state text-bad">Failed to load active sessions.</td></tr>';
+        }
+      }
+
+      function renderSessionsTable(sessions) {
+        const tbody = $('#sessionsTableBody');
+        tbody.innerHTML = '';
+
+        if (!sessions || sessions.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No students currently active. Sessions timeout after 5 minutes of inactivity.</td></tr>';
+          return;
+        }
+
+        sessions.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <span class="roll-pill" data-roll="${escapeHtml(s.roll_number)}">${escapeHtml(s.roll_number)}</span>
+            </td>
+            <td>
+              <span style="font-weight:600;">${escapeHtml(s.student_name)}</span>
+            </td>
+            <td>
+              <span style="font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);">${escapeHtml(s.session_id)}</span>
+            </td>
+            <td class="time-cell">${escapeHtml(s.login_at_display)}</td>
+            <td class="time-cell">${escapeHtml(s.last_seen_display)}</td>
+            <td>
+              <span style="font-size:12px;font-weight:600;color:${s.idle_seconds < 90 ? 'var(--ok)' : 'var(--warn)'};">
+                ${s.idle_seconds}s ago
+              </span>
+            </td>
+            <td>${s.duration_minutes} min</td>
+            <td>
+              <span class="status-badge badge-active">● Active</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // ── STUDENT HISTORY DRILL-DOWN MODAL ─────────────────────────────────
+      async function openStudentHistory(rollNumber) {
+        const modal = $('#studentHistoryModal');
+        modal.hidden = false;
+        $('#modalRollNumber').textContent = rollNumber;
+        $('#modalStudentName').textContent = 'Loading...';
+        $('#modalLoginCount').textContent = '—';
+        $('#modalSessionCount').textContent = '—';
+        $('#modalEventsList').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Loading history...</div>';
+        $('#modalSessionsList').innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Loading sessions...</div>';
+
+        try {
+          const res = await fetch(`/api/admin/student-history?roll=${encodeURIComponent(rollNumber)}`);
+          if (res.status === 401) { setAuthenticatedState(false); return; }
+          const data = await res.json();
+
+          $('#modalStudentName').textContent = data.student_name || '—';
+          $('#modalLoginCount').textContent = (data.events || []).length;
+          $('#modalSessionCount').textContent = (data.sessions || []).length;
+
+          // Render Events
+          const evContainer = $('#modalEventsList');
+          evContainer.innerHTML = '';
+          if (!data.events || data.events.length === 0) {
+            evContainer.innerHTML = '<div style="color:var(--text-faint);font-size:12px;">No recorded login attempts.</div>';
+          } else {
+            data.events.forEach(ev => {
+              const item = document.createElement('div');
+              item.style.cssText = 'background:var(--bg-elevated);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;';
+              const isOk = ev.login_status === 'SUCCESS';
+              item.innerHTML = `
+                <div>
+                  <span class="status-badge ${isOk ? 'badge-success' : 'badge-failed'}" style="margin-right:6px;">${isOk ? 'SUCCESS' : 'FAILED'}</span>
+                  <span>${escapeHtml(ev.device)} • ${escapeHtml(ev.browser)}</span>
+                  ${ev.failure_reason ? `<div style="color:var(--bad);font-size:11px;margin-top:2px;">Reason: ${escapeHtml(ev.failure_reason)}</div>` : ''}
+                </div>
+                <div class="time-cell">${escapeHtml(ev.created_at_display)}</div>
+              `;
+              evContainer.appendChild(item);
+            });
+          }
+
+          // Render Sessions
+          const sessContainer = $('#modalSessionsList');
+          sessContainer.innerHTML = '';
+          if (!data.sessions || data.sessions.length === 0) {
+            sessContainer.innerHTML = '<div style="color:var(--text-faint);font-size:12px;">No recorded sessions.</div>';
+          } else {
+            data.sessions.forEach(sess => {
+              const item = document.createElement('div');
+              item.style.cssText = 'background:var(--bg-elevated);padding:10px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:12px;';
+              const isActive = sess.status === 'active';
+              item.innerHTML = `
+                <div>
+                  <span class="status-badge ${isActive ? 'badge-active' : ''}" style="margin-right:6px;${!isActive ? 'background:var(--border);color:var(--text-muted);' : ''}">${isActive ? 'ACTIVE' : 'CLOSED'}</span>
+                  <span>Login: ${escapeHtml(sess.login_at_display)}</span>
+                </div>
+                <div class="time-cell">Last Seen: ${escapeHtml(sess.last_seen_display)}</div>
+              `;
+              sessContainer.appendChild(item);
+            });
+          }
+
+        } catch (e) {
+          $('#modalStudentName').textContent = 'Error loading history';
+        }
+      }
+
+      $('#modalCloseBtn').addEventListener('click', () => {
+        $('#studentHistoryModal').hidden = true;
+      });
+      $('#studentHistoryModal').addEventListener('click', (e) => {
+        if (e.target === $('#studentHistoryModal')) {
+          $('#studentHistoryModal').hidden = true;
+        }
+      });
+
+      // Delegate clicks for roll number clicks
+      document.addEventListener('click', (e) => {
+        const target = e.target.closest('[data-roll]');
+        if (target) {
+          const roll = target.dataset.roll;
+          if (roll) openStudentHistory(roll);
+        }
+      });
+
+      // ── TAB SWITCHING ────────────────────────────────────────────────────
+      $('#tabActivityBtn').addEventListener('click', () => {
+        state.activeTab = 'activity';
+        $('#tabActivityBtn').classList.add('active');
+        $('#tabSessionsBtn').classList.remove('active');
+        $('#activityViewContainer').hidden = false;
+        $('#sessionsViewContainer').hidden = true;
+        fetchActivity();
+      });
+
+      $('#tabSessionsBtn').addEventListener('click', () => {
+        state.activeTab = 'sessions';
+        $('#tabSessionsBtn').classList.add('active');
+        $('#tabActivityBtn').classList.remove('active');
+        $('#sessionsViewContainer').hidden = false;
+        $('#activityViewContainer').hidden = true;
+        fetchActiveSessions();
+      });
+
+      // ── FILTERS & SEARCH ─────────────────────────────────────────────────
+      let searchTimeout = null;
+      $('#searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          state.search = e.target.value.trim();
+          state.page = 1;
+          fetchActivity();
+        }, 300);
+      });
+
+      $('#statusFilter').addEventListener('change', (e) => {
+        state.status = e.target.value;
+        state.page = 1;
+        fetchActivity();
+      });
+
+      $('#dateFilter').addEventListener('change', (e) => {
+        state.dateFilter = e.target.value;
+        state.page = 1;
+        fetchActivity();
+      });
+
+      $('#sortFilter').addEventListener('change', (e) => {
+        state.sort = e.target.value;
+        state.page = 1;
+        fetchActivity();
+      });
+
+      $('#pageSizeSelect').addEventListener('change', (e) => {
+        state.limit = parseInt(e.target.value, 10);
+        state.page = 1;
+        fetchActivity();
+      });
+
+      $('#resetFiltersBtn').addEventListener('click', () => {
+        $('#searchInput').value = '';
+        $('#statusFilter').value = '';
+        $('#dateFilter').value = '';
+        $('#sortFilter').value = 'latest';
+        state.search = '';
+        state.status = '';
+        state.dateFilter = '';
+        state.sort = 'latest';
+        state.page = 1;
+        fetchActivity();
+      });
+
+      $('#prevPageBtn').addEventListener('click', () => {
+        if (state.page > 1) {
+          state.page--;
+          fetchActivity();
+        }
+      });
+
+      $('#nextPageBtn').addEventListener('click', () => {
+        state.page++;
+        fetchActivity();
+      });
+
+      $('#refreshBtn').addEventListener('click', () => {
+        loadAllData();
+        showToast('Dashboard data refreshed', 'ok');
+      });
+
+      $('#exportCsvBtn').addEventListener('click', () => {
+        window.location.href = '/api/admin/export-csv';
+        showToast('Downloading CSV login report...', 'ok');
+      });
+
+      // ── AUTO REFRESH (EVERY 30 SECONDS) ──────────────────────────────────
+      function startAutoRefresh() {
+        stopAutoRefresh();
+        state.autoRefreshInterval = setInterval(() => {
+          if (state.authenticated) {
+            fetchStats();
+            if (state.activeTab === 'sessions') {
+              fetchActiveSessions();
+            }
+          }
+        }, 30000);
+      }
+
+      function stopAutoRefresh() {
+        if (state.autoRefreshInterval) {
+          clearInterval(state.autoRefreshInterval);
+          state.autoRefreshInterval = null;
+        }
+      }
+
+      // ── INITIAL LOAD ─────────────────────────────────────────────────────
+      checkAuthStatus();
+
+    })();
+  </script>
+</body>
+</html>

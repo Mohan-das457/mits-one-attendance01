@@ -1495,7 +1495,8 @@
 
           <div class="portal-info-box">
             Direct real-time connection to MITS GEMS college portal.<br>
-            Your credentials are never stored remotely.
+            Your credentials are never stored remotely.<br>
+            <span style="display:inline-block;margin-top:4px;font-size:11px;color:var(--text-faint);">🔒 Login activity is recorded for security &amp; usage monitoring.</span>
           </div>
         </form>
       </div>
@@ -1812,6 +1813,8 @@
         target: Math.min(95, Math.max(50, +read('mitsTarget') || 75)),
         includeTT: read('mitsIncludeTT') === '1',
         credentials: null,
+        sessionId: null,
+        heartbeatTimer: null,
         lastFetchTime: 0,
         subjectFilter: 'all',
         subjectSearchQuery: '',
@@ -2496,6 +2499,11 @@
               store('mitsCred', JSON.stringify(credentials));
             }
           }
+          if (!isDemo && data.sessionId) {
+            state.sessionId = data.sessionId;
+            sessionStorage.setItem('mitsSessionId', data.sessionId);
+            startSessionHeartbeat();
+          }
           store('mitsCache', JSON.stringify({ data, at: state.lastFetchTime }));
 
           showAuthenticatedView();
@@ -2509,6 +2517,28 @@
         } finally {
           if (submitBtn) submitBtn.disabled = false;
           if (refreshBtn) refreshBtn.querySelector('svg').classList.remove('spin');
+        }
+      }
+
+      // ── SESSION MONITORING & HEARTBEAT ─────────────────────────────────────
+      function startSessionHeartbeat() {
+        stopSessionHeartbeat();
+        if (!state.sessionId || state.data?.isDemo) return;
+        state.heartbeatTimer = setInterval(() => {
+          if (state.sessionId && !state.data?.isDemo) {
+            fetch('/api/session/heartbeat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId: state.sessionId })
+            }).catch(() => {});
+          }
+        }, 60000);
+      }
+
+      function stopSessionHeartbeat() {
+        if (state.heartbeatTimer) {
+          clearInterval(state.heartbeatTimer);
+          state.heartbeatTimer = null;
         }
       }
 
@@ -2534,12 +2564,30 @@
       });
 
       $('#logoutBtn').addEventListener('click', () => {
+        if (state.sessionId && !state.data?.isDemo) {
+          try {
+            fetch('/api/session/logout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sessionId: state.sessionId })
+            }).catch(() => {});
+          } catch (e) {}
+        }
+        stopSessionHeartbeat();
         try {
           sessionStorage.clear();
           remove('mitsCred');
           remove('mitsCache');
         } catch (e) {}
         window.location.reload();
+      });
+
+      // Notify server of logout on browser tab close
+      window.addEventListener('beforeunload', () => {
+        if (state.sessionId && !state.data?.isDemo && navigator.sendBeacon) {
+          const blob = new Blob([JSON.stringify({ sessionId: state.sessionId })], { type: 'application/json' });
+          navigator.sendBeacon('/api/session/logout', blob);
+        }
       });
 
       // Password toggle reveal
@@ -2573,6 +2621,13 @@
             showAuthenticatedView();
           }
         } catch (e) {}
+
+        // Restore active session tracking if present
+        const savedSessionId = sessionStorage.getItem('mitsSessionId');
+        if (savedSessionId && !state.data?.isDemo) {
+          state.sessionId = savedSessionId;
+          startSessionHeartbeat();
+        }
 
         // Check for saved credentials
         let savedCred = null;
