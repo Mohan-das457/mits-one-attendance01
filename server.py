@@ -91,13 +91,7 @@ def health():
     })
 
 
-@app.route("/api/demo", methods=["GET", "POST"])
-def demo_data():
-    """Return realistic demo student data for testing, offline preview, and showcase.
-    Demo logins are never recorded into the student monitoring database.
-    """
-    mock = GemsAPIClient.get_mock_data()
-    return jsonify(mock)
+# Demo endpoint removed; demo mode no longer supported.
 
 
 # ── Student Authentication & Attendance Data Endpoint ────────────────────────
