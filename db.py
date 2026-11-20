@@ -29,6 +29,31 @@ except ImportError:
     logger.warning("psycopg2 is not installed. Database tracking will be disabled until installed.")
 
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+
+def _load_env_files():
+    """Load variables from .env.local and .env into os.environ if present."""
+    for fname in (".env.local", ".env"):
+        fpath = os.path.join(HERE, fname)
+        if os.path.isfile(fpath):
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            k = k.strip()
+                            v = v.strip().strip("'\"")
+                            if k not in os.environ:
+                                os.environ[k] = v
+            except Exception:
+                pass
+
+
+_load_env_files()
+
+
 def get_db_url() -> str:
     """Retrieve DATABASE_URL from environment."""
     return os.environ.get("DATABASE_URL", "").strip()

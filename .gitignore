@@ -6,3 +6,7 @@ build_lambda/
 *.zip
 *.tmp
 
+.neon
+node_modules/
+.env.local
+.env
