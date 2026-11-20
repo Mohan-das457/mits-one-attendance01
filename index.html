@@ -1,0 +1,2600 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090d16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>MITS ONE — College Attendance Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================================================
+       DESIGN SYSTEM & CSS VARIABLES
+       ========================================================================== */
+    :root {
+      --bg: #090d16;
+      --bg-elevated: #0f172a;
+      --surface: #121c32;
+      --surface-hover: #17243e;
+      --surface-glass: rgba(18, 28, 50, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      
+      --brand-from: #6366f1;
+      --brand-to: #a855f7;
+      --brand-glow: rgba(99, 102, 241, 0.35);
+      --brand-subtle: rgba(99, 102, 241, 0.12);
+      
+      --ok: #10b981;
+      --ok-glow: rgba(16, 185, 129, 0.22);
+      --ok-subtle: rgba(16, 185, 129, 0.12);
+      
+      --warn: #f59e0b;
+      --warn-glow: rgba(245, 158, 11, 0.22);
+      --warn-subtle: rgba(245, 158, 11, 0.12);
+      
+      --bad: #f43f5e;
+      --bad-glow: rgba(244, 63, 94, 0.22);
+      --bad-subtle: rgba(244, 63, 94, 0.12);
+      
+      --info: #0ea5e9;
+      --info-glow: rgba(14, 165, 233, 0.22);
+      --info-subtle: rgba(14, 165, 233, 0.12);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.25);
+      --shadow-md: 0 8px 24px -4px rgba(0,0,0,0.35);
+      --shadow-lg: 0 20px 40px -8px rgba(0,0,0,0.5);
+      
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-elevated: #f1f5f9;
+      --surface: #ffffff;
+      --surface-hover: #f8fafc;
+      --surface-glass: rgba(255, 255, 255, 0.85);
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      
+      --brand-from: #4f46e5;
+      --brand-to: #9333ea;
+      --brand-glow: rgba(79, 70, 229, 0.2);
+      --brand-subtle: rgba(79, 70, 229, 0.08);
+      
+      --ok: #059669;
+      --ok-glow: rgba(5, 150, 105, 0.16);
+      --ok-subtle: rgba(5, 150, 105, 0.08);
+      
+      --warn: #d97706;
+      --warn-glow: rgba(217, 119, 6, 0.16);
+      --warn-subtle: rgba(217, 119, 6, 0.08);
+      
+      --bad: #e11d48;
+      --bad-glow: rgba(225, 29, 72, 0.16);
+      --bad-subtle: rgba(225, 29, 72, 0.08);
+      
+      --info: #0284c7;
+      --info-glow: rgba(2, 132, 199, 0.16);
+      --info-subtle: rgba(2, 132, 199, 0.08);
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 32px -4px rgba(0,0,0,0.12);
+    }
+
+    /* Base Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      padding-bottom: 80px; /* Space for mobile nav */
+    }
+
+    button, input, select {
+      font: inherit;
+      color: inherit;
+      border: none;
+      outline: none;
+      background: none;
+    }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+
+    /* Layout Wrapper */
+    .app-container {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      top: -160px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 720px;
+      height: 380px;
+      background: radial-gradient(circle, var(--brand-glow) 0%, transparent 70%);
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.6;
+    }
+
+    /* ==========================================================================
+       HEADER & NAVIGATION BAR
+       ========================================================================== */
+    header.app-header {
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 10px 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 24px;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-logo-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      display: grid;
+      place-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 4px 12px var(--brand-glow);
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: var(--brand-subtle);
+      color: var(--brand-from);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+    .icon-btn svg { width: 16px; height: 16px; stroke-width: 2.2; flex-shrink: 0; }
+    .icon-btn.active {
+      background: var(--brand-subtle);
+      color: var(--brand-from);
+      border-color: var(--brand-from);
+    }
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* ==========================================================================
+       LOGIN & AUTH CARD
+       ========================================================================== */
+    .login-container {
+      max-width: 440px;
+      margin: 8vh auto 0;
+      position: relative;
+      z-index: 10;
+    }
+    .card-glass {
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-glass::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand-from), var(--brand-to));
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+    .login-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      margin-top: 12px;
+      color: var(--text-main);
+    }
+    .login-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-faint);
+      pointer-events: none;
+      display: grid;
+      place-content: center;
+    }
+    .input-icon svg { width: 17px; height: 17px; }
+    .form-input {
+      width: 100%;
+      height: 44px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 40px 0 38px;
+      color: var(--text-main);
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .form-input:focus {
+      border-color: var(--brand-from);
+      box-shadow: 0 0 0 3px var(--brand-subtle);
+      background: var(--surface);
+    }
+    .input-suffix-btn {
+      position: absolute;
+      right: 10px;
+      color: var(--text-faint);
+      padding: 6px;
+      display: grid;
+      place-content: center;
+      border-radius: 6px;
+    }
+    .input-suffix-btn:hover { color: var(--text-muted); }
+    .input-suffix-btn svg { width: 18px; height: 18px; }
+
+    .remember-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 14px 0 20px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .remember-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .remember-check input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-from);
+      border-radius: 4px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 46px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px var(--brand-glow);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    .btn-demo {
+      width: 100%;
+      height: 42px;
+      border-radius: var(--radius-md);
+      background: var(--surface-hover);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+      transition: all 0.2s ease;
+    }
+    .btn-demo:hover {
+      border-color: var(--brand-from);
+      color: var(--brand-from);
+      background: var(--brand-subtle);
+    }
+
+    .error-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--bad-subtle);
+      border: 1px solid var(--bad);
+      color: var(--bad);
+      font-size: 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .error-box svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+
+    .portal-info-box {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-faint);
+      line-height: 1.5;
+    }
+
+    /* ==========================================================================
+       HERO DASHBOARD & STUDENT PROFILE
+       ========================================================================== */
+    .dashboard-hero {
+      position: relative;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 20px;
+    }
+
+    .student-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .student-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .student-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      display: grid;
+      place-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: 0 4px 14px var(--brand-glow);
+      flex-shrink: 0;
+    }
+    .student-details h2 {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .student-sub {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-family: var(--font-mono);
+    }
+    .tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-sans);
+    }
+    .tag-live {
+      background: var(--ok-subtle);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .tag-live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+    }
+    .tag-demo {
+      background: var(--warn-subtle);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .hero-main-content {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 28px;
+      align-items: center;
+    }
+    @media (max-width: 640px) {
+      .hero-main-content {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+    }
+
+    /* Radial Progress Gauge */
+    .gauge-wrapper {
+      position: relative;
+      width: 170px;
+      height: 170px;
+      flex-shrink: 0;
+    }
+    .gauge-svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+    .gauge-bg {
+      stroke: var(--bg-elevated);
+      stroke-width: 12;
+    }
+    .gauge-fill {
+      stroke-linecap: round;
+      stroke-width: 12;
+      transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s;
+    }
+    .gauge-notch {
+      stroke: var(--text-main);
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: 0.8;
+    }
+    .gauge-center-info {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+    }
+    .gauge-pct {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+      font-family: var(--font-sans);
+    }
+    .gauge-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .gauge-subcount {
+      font-size: 12px;
+      color: var(--text-faint);
+      margin-top: 2px;
+      font-family: var(--font-mono);
+    }
+
+    /* KPI Deck & Controls */
+    .hero-kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      width: 100%;
+    }
+    .kpi-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .kpi-title svg { width: 14px; height: 14px; }
+    .kpi-value {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+    .kpi-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    /* Target Threshold & Filter Controls */
+    .hero-controller-row {
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+    }
+    .target-slider-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+    .target-badge {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      color: var(--brand-from);
+      font-family: var(--font-mono);
+      min-width: 44px;
+      text-align: center;
+    }
+    .toggle-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .toggle-checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-from);
+      border-radius: 4px;
+    }
+
+    /* ==========================================================================
+       TABS NAVIGATION
+       ========================================================================== */
+    .tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 6px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+
+    .tab-pill {
+      flex: 1;
+      min-width: 120px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-pill:hover {
+      color: var(--text-main);
+      background: var(--surface-hover);
+    }
+    .tab-pill svg { width: 17px; height: 17px; }
+    .tab-pill[aria-selected="true"] {
+      background: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 4px 14px var(--brand-glow);
+    }
+    .tab-badge {
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.2);
+      color: inherit;
+    }
+
+    /* Mobile Bottom Navigation Bar */
+    .mobile-nav-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      padding: 8px 12px;
+      z-index: 99;
+      justify-content: space-around;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+    }
+    @media (max-width: 640px) {
+      .tabs-bar { display: none; }
+      .mobile-nav-bar { display: flex; }
+    }
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+    }
+    .mobile-nav-item svg { width: 20px; height: 20px; }
+    .mobile-nav-item.active {
+      color: var(--brand-from);
+    }
+
+    /* ==========================================================================
+       SUBJECTS VIEW & WHAT-IF SIMULATOR
+       ========================================================================== */
+    .search-filter-deck {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search-input-box {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+    .search-input-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-faint);
+    }
+    .search-input {
+      width: 100%;
+      height: 38px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 12px 0 36px;
+      color: var(--text-main);
+      font-size: 13.5px;
+    }
+    .search-input:focus {
+      border-color: var(--brand-from);
+    }
+    .filter-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .filter-chip {
+      height: 32px;
+      padding: 0 12px;
+      border-radius: var(--radius-full);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .filter-chip:hover {
+      color: var(--text-main);
+      background: var(--surface-hover);
+    }
+    .filter-chip.active {
+      background: var(--brand-subtle);
+      border-color: var(--brand-from);
+      color: var(--brand-from);
+    }
+
+    .subjects-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .subject-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .subject-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    .subject-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: var(--border);
+    }
+    .subject-card.is-ok::before { background: var(--ok); }
+    .subject-card.is-warn::before { background: var(--warn); }
+    .subject-card.is-bad::before { background: var(--bad); }
+
+    .subj-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .subj-title-group h3 {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+    .subj-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .code-pill {
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    .subj-pct-group {
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .subj-pct {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: var(--font-sans);
+      letter-spacing: -0.5px;
+    }
+    .subj-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* Progress bar with target tick */
+    .progress-bar-wrap {
+      position: relative;
+      height: 9px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      margin: 12px 0 10px;
+      overflow: visible;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.4s ease, background-color 0.3s;
+    }
+    .progress-target-notch {
+      position: absolute;
+      top: -3px;
+      width: 2.5px;
+      height: 15px;
+      border-radius: 1px;
+      background: var(--text-main);
+      opacity: 0.6;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    .bunk-advisor {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .bunk-advisor svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* Interactive What-If Simulator within card */
+    .sim-strip {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .sim-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sim-btn {
+      height: 26px;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .sim-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+    }
+    .sim-btn.add-att:hover { color: var(--ok); border-color: var(--ok); background: var(--ok-subtle); }
+    .sim-btn.add-bunk:hover { color: var(--bad); border-color: var(--bad); background: var(--bad-subtle); }
+    .sim-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--brand-subtle);
+      color: var(--brand-from);
+    }
+    .sim-reset {
+      font-size: 11px;
+      color: var(--text-faint);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .sim-reset:hover { color: var(--text-muted); }
+
+    /* ==========================================================================
+       TODAY'S SCHEDULE & TIMETABLE VIEWS
+       ========================================================================== */
+    .today-hero-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .today-date-text h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+    .today-date-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .today-stats-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .class-timeline-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .class-timeline-card:hover {
+      border-color: var(--border-strong);
+    }
+    .class-timeline-card.is-current {
+      border-color: var(--brand-from);
+      box-shadow: 0 0 0 1px var(--brand-from), 0 4px 18px var(--brand-glow);
+    }
+    .class-timeline-card.is-current::before {
+      content: 'HAPPENING NOW';
+      position: absolute;
+      top: -9px;
+      right: 18px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      background: var(--brand-from);
+      color: #fff;
+      padding: 1px 8px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 2px 8px var(--brand-glow);
+    }
+
+    .class-time-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 90px;
+    }
+    .class-time-slot .time-main {
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+    .class-time-slot .time-period {
+      font-size: 11.5px;
+      color: var(--text-faint);
+    }
+
+    .class-info {
+      flex: 1;
+    }
+    .class-info .subj-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .class-info .subj-details {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .class-info .subj-details span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .class-info .subj-details svg { width: 13px; height: 13px; color: var(--text-faint); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .status-present {
+      background: var(--ok-subtle);
+      color: var(--ok);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-absent {
+      background: var(--bad-subtle);
+      color: var(--bad);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+    .status-permission {
+      background: var(--warn-subtle);
+      color: var(--warn);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .status-scheduled {
+      background: var(--info-subtle);
+      color: var(--info);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+
+    /* Day selector for weekly timetable */
+    .day-selector-strip {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .day-selector-strip::-webkit-scrollbar { display: none; }
+
+    .day-btn {
+      flex: 1;
+      min-width: 90px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .day-btn span.day-count {
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text-faint);
+    }
+    .day-btn:hover {
+      background: var(--surface-hover);
+      color: var(--text-main);
+    }
+    .day-btn[aria-selected="true"] {
+      background: var(--brand-subtle);
+      border-color: var(--brand-from);
+      color: var(--brand-from);
+      box-shadow: 0 2px 10px var(--brand-glow);
+    }
+    .day-btn[aria-selected="true"] span.day-count {
+      color: var(--brand-from);
+    }
+
+    /* ==========================================================================
+       PLANNER & SEMESTER CALCULATOR
+       ========================================================================== */
+    .planner-deck {
+      display: grid;
+      gap: 16px;
+    }
+    .planner-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+    }
+    .planner-card h3 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .planner-card p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .regulation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .reg-item {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+    .reg-item.reg-safe { border-left: 4px solid var(--ok); }
+    .reg-item.reg-warn { border-left: 4px solid var(--warn); }
+    .reg-item.reg-bad { border-left: 4px solid var(--bad); }
+
+    .reg-header {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .reg-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* ==========================================================================
+       PRINTABLE REPORT MODAL & SHEET
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: grid;
+      place-content: center;
+      padding: 20px;
+    }
+    .report-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      display: grid;
+      place-content: center;
+    }
+    .modal-close-btn:hover { color: var(--text-main); }
+
+    /* Print Stylesheet */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+      .ambient-glow, .app-header, .tabs-bar, .mobile-nav-bar, .hero-controller-row,
+      .search-filter-deck, .sim-strip, .icon-btn, .modal-backdrop, #login {
+        display: none !important;
+      }
+      .app-container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      .dashboard-hero {
+        background: #fff !important;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        color: #000 !important;
+      }
+      .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 12px;
+      }
+      .print-header h1 { font-size: 20px; text-transform: uppercase; }
+      .print-header p { font-size: 13px; color: #444; }
+      .print-table {
+        display: table !important;
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+      .print-table th, .print-table td {
+        border: 1px solid #333;
+        padding: 8px 10px;
+        font-size: 12px;
+        text-align: left;
+      }
+      .print-table th { background: #eee; }
+      .subjects-grid { display: none !important; }
+    }
+    .print-only { display: none; }
+
+    /* ==========================================================================
+       TOAST NOTIFICATIONS
+       ========================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast-item {
+      pointer-events: auto;
+      background: var(--surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      box-shadow: var(--shadow-lg);
+      font-size: 13.5px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .toast-item.toast-ok svg { color: var(--ok); }
+    .toast-item.toast-bad svg { color: var(--bad); }
+    .toast-item.toast-info svg { color: var(--info); }
+    @keyframes slideIn {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Helper Utilities */
+    .text-ok { color: var(--ok); }
+    .text-warn { color: var(--warn); }
+    .text-bad { color: var(--bad); }
+    .text-muted { color: var(--text-muted); }
+    .bg-ok { background-color: var(--ok); }
+    .bg-warn { background-color: var(--warn); }
+    .bg-bad { background-color: var(--bad); }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .empty-state svg { width: 36px; height: 36px; color: var(--text-faint); margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Background Ambience -->
+  <div class="ambient-glow"></div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+
+    <!-- Global App Header -->
+    <header class="app-header">
+      <div class="brand-mark">
+        <div class="brand-logo-icon">M</div>
+        <div>
+          <div class="brand-title">MITS ONE <span class="brand-tag">GEMS</span></div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live status indicator -->
+        <span id="syncStatusBadge" class="tag-chip tag-live" hidden>Live Sync</span>
+        
+        <!-- Refresh Button -->
+        <button id="refreshBtn" class="icon-btn" title="Refresh attendance data" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <span class="desktop-only">Refresh</span>
+        </button>
+
+        <!-- Print / Export Report -->
+        <button id="printBtn" class="icon-btn" title="Print Official Attendance Report" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span class="desktop-only">Report</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="icon-btn" title="Switch Theme">
+          <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" hidden><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <!-- Logout Button -->
+        <button id="logoutBtn" class="icon-btn" title="Sign out" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ======================================================================
+         LOGIN SECTION
+         ====================================================================== -->
+    <section id="loginView" class="login-container">
+      <div class="card-glass">
+        <div class="login-header">
+          <div class="brand-logo-icon" style="margin: 0 auto; width: 48px; height: 48px; font-size: 22px;">M</div>
+          <h1>Sign in to GEMS</h1>
+          <p>Madanapalle Institute of Technology &amp; Science</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" for="usernameInput">Student Roll Number / USN</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <input id="usernameInput" class="form-input" type="text" placeholder="e.g. 21691A04G5" autocomplete="username" autocorrect="off" autocapitalize="characters" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="passwordInput">GEMS Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input id="passwordInput" class="form-input" type="password" placeholder="••••••••" autocomplete="current-password" required>
+              <button type="button" id="togglePasswordBtn" class="input-suffix-btn" title="Show or hide password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="remember-row">
+            <label class="remember-check">
+              <input id="rememberCheck" type="checkbox" checked>
+              <span>Keep me signed in</span>
+            </label>
+          </div>
+
+          <button id="submitLoginBtn" class="btn-primary" type="submit">
+            <span>Sign in to GEMS</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:18px;height:18px;"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <button id="demoModeBtn" class="btn-demo" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px;height:16px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Explore Demo Student Profile</span>
+          </button>
+
+          <div id="loginErrorBox" class="error-box" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="loginErrorText"></span>
+          </div>
+
+          <div class="portal-info-box">
+            Direct real-time connection to MITS GEMS college portal.<br>
+            Your credentials are never stored remotely.
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         MAIN APP DASHBOARD (SHOWN WHEN LOGGED IN)
+         ====================================================================== -->
+    <main id="mainAppView" hidden>
+
+      <!-- Print Header (Visible only when printed) -->
+      <div class="print-header print-only">
+        <h1>Madanapalle Institute of Technology &amp; Science</h1>
+        <p>Official Attendance Status &amp; Academic Summary Report</p>
+      </div>
+
+      <!-- Hero Banner & Overview Gauge -->
+      <section class="dashboard-hero">
+        <div class="student-meta-bar">
+          <div class="student-badge-group">
+            <div id="studentAvatar" class="student-avatar">ST</div>
+            <div class="student-details">
+              <h2 id="studentName">—</h2>
+              <div class="student-sub">
+                <span id="studentUsn">—</span>
+                <span>•</span>
+                <span id="studentDept">—</span>
+              </div>
+            </div>
+          </div>
+          <div id="lastUpdatedStamp" class="text-muted" style="font-size:12px; font-family:var(--font-mono);">
+            Updated just now
+          </div>
+        </div>
+
+        <div class="hero-main-content">
+          <!-- Radial Progress Gauge -->
+          <div class="gauge-wrapper">
+            <svg class="gauge-svg" viewBox="0 0 160 160">
+              <circle class="gauge-bg" cx="80" cy="80" r="66" fill="none" />
+              <circle id="gaugeFill" class="gauge-fill" cx="80" cy="80" r="66" fill="none" stroke="var(--ok)" stroke-dasharray="414.7" stroke-dashoffset="414.7" />
+              <!-- Target 75% notch -->
+              <g id="targetNotchGroup" transform="rotate(270 80 80)">
+                <line class="gauge-notch" x1="80" y1="4" x2="80" y2="24" />
+              </g>
+            </svg>
+            <div class="gauge-center-info">
+              <span id="heroPctText" class="gauge-pct">0.0%</span>
+              <span id="heroPctLabel" class="gauge-label">Official</span>
+              <span id="heroClassCount" class="gauge-subcount">0 / 0 Classes</span>
+            </div>
+          </div>
+
+          <!-- Hero KPI Deck -->
+          <div class="hero-kpis">
+            <!-- Exam Eligibility Card -->
+            <div class="kpi-card">
+              <div class="kpi-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                <span>Exam Eligibility</span>
+              </div>
+              <div id="kpiEligibilityText" class="kpi-value">Safe Zone</div>
+              <div id="kpiEligibilityBadge" class="kpi-status-badge text-ok">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Hall Ticket Guaranteed</span>
+              </div>
+            </div>
+
+            <!-- Bunk / Attend Cushion Card -->
+            <div class="kpi-card">
+              <div class="kpi-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                <span>Safety Margin</span>
+              </div>
+              <div id="kpiMarginValue" class="kpi-value">0 Classes</div>
+              <div id="kpiMarginSub" class="kpi-status-badge text-muted">
+                <span>Based on 75% Target</span>
+              </div>
+            </div>
+
+            <!-- Today's Classes Card -->
+            <div class="kpi-card">
+              <div class="kpi-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>Today's Classes</span>
+              </div>
+              <div id="kpiTodayCount" class="kpi-value">0 Scheduled</div>
+              <div id="kpiTodaySummary" class="kpi-status-badge text-ok">
+                <span>0 Marked Present</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target Threshold Controller Row -->
+        <div class="hero-controller-row">
+          <div class="target-slider-group">
+            <span>Target Threshold:</span>
+            <input id="targetSlider" type="range" min="50" max="95" step="1" value="75" style="width: 130px; accent-color: var(--brand-from); cursor: pointer;">
+            <span id="targetBadge" class="target-badge">75%</span>
+          </div>
+
+          <label class="toggle-checkbox-label" title="Official university calculation excludes Technical Training, Aptitude & Soft Skills">
+            <input id="toggleTtCheck" type="checkbox">
+            <span>Include Technical Training &amp; Soft Skills</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Desktop Tabs Bar -->
+      <nav class="tabs-bar" role="tablist">
+        <button class="tab-pill" role="tab" data-tab="subjects" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Subjects &amp; Simulator</span>
+          <span id="subjectCountBadge" class="tab-badge">0</span>
+        </button>
+
+        <button class="tab-pill" role="tab" data-tab="today" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Today's Classes</span>
+          <span id="todayCountBadge" class="tab-badge">0</span>
+        </button>
+
+        <button class="tab-pill" role="tab" data-tab="timetable" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span>Weekly Timetable</span>
+        </button>
+
+        <button class="tab-pill" role="tab" data-tab="planner" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V9"/></svg>
+          <span>Goal &amp; Regulations</span>
+        </button>
+      </nav>
+
+      <!-- TAB 1: SUBJECTS VIEW & INTERACTIVE SIMULATOR -->
+      <section id="tabSubjectsView">
+        <div class="search-filter-deck">
+          <div class="search-input-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="subjectSearchInput" class="search-input" type="text" placeholder="Search subject name or code...">
+          </div>
+
+          <div class="filter-chips">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="risk">At Risk (&lt;75%)</button>
+            <button class="filter-chip" data-filter="safe">Safe (&gt;=75%)</button>
+            <button class="filter-chip" data-filter="high">High (&gt;=85%)</button>
+          </div>
+        </div>
+
+        <div id="subjectsContainer" class="subjects-grid">
+          <!-- Dynamic Subject Cards Rendered Here -->
+        </div>
+
+        <!-- Printable Table Structure (Appears only on Print) -->
+        <table id="printableReportTable" class="print-table print-only">
+          <thead>
+            <tr>
+              <th>Subject Name</th>
+              <th>Code</th>
+              <th>Attended</th>
+              <th>Conducted</th>
+              <th>Percentage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="printableReportBody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- TAB 2: TODAY'S LIVE CLASS SCHEDULE -->
+      <section id="tabTodayView" hidden>
+        <div class="today-hero-card">
+          <div class="today-date-text">
+            <h3 id="todayDateTitle">Today's Schedule</h3>
+            <p id="todaySubText">Real-time attendance status and classroom timetable</p>
+          </div>
+          <div id="todayStatusPillsGroup" class="today-stats-pills">
+            <!-- Dynamic Pills -->
+          </div>
+        </div>
+
+        <div id="todayClassesContainer">
+          <!-- Dynamic Today's Class Timeline Cards -->
+        </div>
+      </section>
+
+      <!-- TAB 3: WEEKLY TIMETABLE -->
+      <section id="tabTimetableView" hidden>
+        <div class="day-selector-strip" id="daySelectorStrip">
+          <!-- Monday - Saturday dynamic tabs -->
+        </div>
+
+        <div id="timetableClassesContainer">
+          <!-- Day's classes dynamic list -->
+        </div>
+      </section>
+
+      <!-- TAB 4: GOAL PLANNER & REGULATIONS -->
+      <section id="tabPlannerView" hidden>
+        <div class="planner-deck">
+          <div class="planner-card">
+            <h3>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:20px;height:20px;color:var(--brand-from);"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              <span>MITS Attendance Regulations &amp; Condonation Policy</span>
+            </h3>
+            <p>
+              According to the autonomous academic regulations of Madanapalle Institute of Technology &amp; Science:
+            </p>
+            
+            <div class="regulation-grid">
+              <div class="reg-item reg-safe">
+                <div class="reg-header text-ok">&gt;= 75.0% — Normal Eligibility</div>
+                <div class="reg-desc">
+                  Eligible to register and write Semester End Examinations without any fine or condonation certificate.
+                </div>
+              </div>
+
+              <div class="reg-item reg-warn">
+                <div class="reg-header text-warn">65.0% to 74.9% — Condonation Zone</div>
+                <div class="reg-desc">
+                  Eligible only on genuine medical or approved on-duty grounds with submission of valid certificates and prescribed Condonation Fee payment.
+                </div>
+              </div>
+
+              <div class="reg-item reg-bad">
+                <div class="reg-header text-bad">&lt; 65.0% — Detention Zone</div>
+                <div class="reg-desc">
+                  Strictly NOT eligible to appear for semester end examinations. Detained for shortage of attendance; must repeat the semester courses.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="planner-card">
+            <h3>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:20px;height:20px;color:var(--brand-from);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Semester Projection &amp; Bunk Calculator</span>
+            </h3>
+            <p>
+              Simulate upcoming classes remaining in this semester to project your target standing:
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px;">
+              <div>
+                <label class="form-label" for="projRemainingInput">Estimated Remaining Classes</label>
+                <input id="projRemainingInput" class="form-input" type="number" min="0" max="200" value="40">
+              </div>
+              <div>
+                <label class="form-label" for="projGoalInput">Target Goal %</label>
+                <input id="projGoalInput" class="form-input" type="number" min="50" max="95" value="75">
+              </div>
+            </div>
+
+            <div id="projectionResultBox" style="padding: 16px; border-radius: var(--radius-md); background: var(--bg-elevated); border: 1px solid var(--border);">
+              <!-- Dynamic projection summary -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Mobile Sticky Bottom Navigation -->
+    <nav class="mobile-nav-bar" id="mobileNavBar" hidden>
+      <button class="mobile-nav-item active" data-tab="subjects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Subjects</span>
+      </button>
+
+      <button class="mobile-nav-item" data-tab="today">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Today</span>
+      </button>
+
+      <button class="mobile-nav-item" data-tab="timetable">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <span>Timetable</span>
+      </button>
+
+      <button class="mobile-nav-item" data-tab="planner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M16 12l-4-4-4 4M12 16V9"/></svg>
+        <span>Planner</span>
+      </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <!-- ==========================================================================
+       CLIENT APPLICATION LOGIC
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ── CONSTANTS & STORAGE HELPERS ──────────────────────────────────────────
+      const NON_OFFICIAL_CODES = ['TECHNICALTRAINING', 'APTITUDE', 'SOFTSKILLS'];
+      const DAYS_ORDER = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+      const store = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+      const read = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+      const remove = (k) => { try { localStorage.removeItem(k); } catch (e) {} };
+
+      // ── GLOBAL APPLICATION STATE ─────────────────────────────────────────────
+      const state = {
+        data: null,
+        activeTab: 'subjects',
+        selectedDay: DAYS_ORDER[Math.max(0, Math.min(5, (new Date().getDay() + 6) % 7))], // default to current college weekday
+        target: Math.min(95, Math.max(50, +read('mitsTarget') || 75)),
+        includeTT: read('mitsIncludeTT') === '1',
+        credentials: null,
+        lastFetchTime: 0,
+        subjectFilter: 'all',
+        subjectSearchQuery: '',
+        simulations: {} // { [subjectCode]: { extraAttended: 0, extraBunked: 0 } }
+      };
+
+      // ── DOM SELECTOR SHORTCUTS ───────────────────────────────────────────────
+      const $ = (selector) => document.querySelector(selector);
+      const $$ = (selector) => document.querySelectorAll(selector);
+
+      // ── TOAST NOTIFICATIONS ──────────────────────────────────────────────────
+      function showToast(message, type = 'info') {
+        const container = $('#toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-item toast-${type}`;
+        
+        let iconSvg = '';
+        if (type === 'ok') {
+          iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        } else if (type === 'bad') {
+          iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+        } else {
+          iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+        }
+        
+        toast.innerHTML = `${iconSvg}<span>${message}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(10px)';
+          toast.style.transition = 'all 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3600);
+      }
+
+      // ── THEME MANAGER ────────────────────────────────────────────────────────
+      function applyTheme(t) {
+        document.documentElement.dataset.theme = t;
+        store('mitsTheme', t);
+        const isDark = t === 'dark';
+        $('#themeIconSun').hidden = isDark;
+        $('#themeIconMoon').hidden = !isDark;
+      }
+      const initialTheme = read('mitsTheme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      applyTheme(initialTheme);
+
+      $('#themeToggleBtn').onclick = () => {
+        const current = document.documentElement.dataset.theme;
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+      };
+
+      // ── CALCULATION HELPERS ──────────────────────────────────────────────────
+      // Accurate Bunk / Attendance Required Calculator
+      function calculateBunkMargin(attended, conducted, targetPct) {
+        const t = targetPct / 100;
+        const currentPct = conducted > 0 ? (attended / conducted) * 100 : 0;
+        
+        if (conducted === 0) {
+          return { canBunk: true, count: 0, currentPct: 0 };
+        }
+
+        if (currentPct >= targetPct) {
+          // Can bunk formula: (attended / t) - conducted
+          const maxClasses = Math.floor(attended / t);
+          const safeToBunk = Math.max(0, maxClasses - conducted);
+          return { canBunk: true, count: safeToBunk, currentPct };
+        } else {
+          // Must attend formula: (t * conducted - attended) / (1 - t)
+          if (t >= 1) return { canBunk: false, count: 999, currentPct };
+          const needToAttend = Math.ceil((t * conducted - attended) / (1 - t));
+          return { canBunk: false, count: Math.max(1, needToAttend), currentPct };
+        }
+      }
+
+      function getStatusColorClass(percentage, target) {
+        if (percentage >= target) return 'ok';
+        if (percentage >= 65) return 'warn';
+        return 'bad';
+      }
+
+      function format12Hour(timeStr) {
+        if (!timeStr) return '';
+        const match = /^(\d{1,2}):(\d{2})/.exec(timeStr);
+        if (!match) return timeStr;
+        let hour = parseInt(match[1], 10);
+        const mins = match[2];
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12 || 12;
+        return `${hour}:${mins} ${ampm}`;
+      }
+
+      function isOfficialSubject(subj) {
+        return !NON_OFFICIAL_CODES.includes(String(subj.code || '').toUpperCase());
+      }
+
+      // ── HERO & OVERALL ANALYTICS RENDERER ─────────────────────────────────────
+      function renderHeroDashboard() {
+        if (!state.data) return;
+        const d = state.data;
+        const student = d.student || {};
+
+        // Student Info
+        $('#studentName').textContent = student.name || 'Student';
+        $('#studentUsn').textContent = student.usn || student.id || '—';
+        $('#studentDept').textContent = student.department || student.semester || 'MITS College';
+        
+        // Avatar Initials
+        const nameParts = (student.name || 'ST').trim().split(/\s+/);
+        const initials = nameParts.length >= 2
+          ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+          : (nameParts[0].slice(0, 2)).toUpperCase();
+        $('#studentAvatar').textContent = initials;
+
+        // Demo / Live Tag
+        if (d.isDemo || d.demo) {
+          $('#syncStatusBadge').hidden = false;
+          $('#syncStatusBadge').className = 'tag-chip tag-demo';
+          $('#syncStatusBadge').textContent = 'Demo Mode';
+        } else {
+          $('#syncStatusBadge').hidden = false;
+          $('#syncStatusBadge').className = 'tag-chip tag-live';
+          $('#syncStatusBadge').textContent = 'Live Sync';
+        }
+
+        // Active Attendance Pool (Official vs Total with TT)
+        const subjectsPool = (d.attendance || []).filter(s => state.includeTT || isOfficialSubject(s));
+        
+        // Calculate dynamic overall taking into account any subject "what-if" simulations
+        let totalAttended = 0;
+        let totalConducted = 0;
+        let sumPercentages = 0;
+
+        subjectsPool.forEach(subj => {
+          const sim = state.simulations[subj.code] || { extraAttended: 0, extraBunked: 0 };
+          const effectiveAtt = (subj.attended || 0) + sim.extraAttended;
+          const effectiveCond = (subj.conducted || 0) + sim.extraAttended + sim.extraBunked;
+          const effPct = effectiveCond > 0 ? (effectiveAtt / effectiveCond) * 100 : (+subj.percentage || 0);
+
+          totalAttended += effectiveAtt;
+          totalConducted += effectiveCond;
+          sumPercentages += effPct;
+        });
+
+        // College official percentage is average of subject percentages
+        const avgPercentage = subjectsPool.length > 0 ? (sumPercentages / subjectsPool.length) : 0;
+        const displayPct = avgPercentage.toFixed(1);
+        const colorClass = getStatusColorClass(avgPercentage, state.target);
+
+        // Update Gauge
+        $('#heroPctText').textContent = `${displayPct}%`;
+        $('#heroPctText').className = `gauge-pct text-${colorClass}`;
+        $('#heroPctLabel').textContent = state.includeTT ? 'Overall (with TT)' : 'Official (excl. TT)';
+        $('#heroClassCount').textContent = `${totalAttended} / ${totalConducted} Classes`;
+
+        // SVG Radial Gauge calculation
+        const circumference = 2 * Math.PI * 66; // r=66 -> ~414.69
+        const strokeDashoffset = circumference - (circumference * Math.min(100, Math.max(0, avgPercentage)) / 100);
+        const fillCircle = $('#gaugeFill');
+        fillCircle.style.strokeDashoffset = strokeDashoffset;
+        fillCircle.style.stroke = `var(--${colorClass})`;
+
+        // Target Notch rotation (360 deg * target/100, rotated starting from top)
+        const targetDeg = (state.target / 100) * 360 - 90;
+        $('#targetNotchGroup').setAttribute('transform', `rotate(${targetDeg} 80 80)`);
+
+        // KPI 1: Exam Eligibility
+        const kpiElig = $('#kpiEligibilityText');
+        const kpiBadge = $('#kpiEligibilityBadge');
+        if (avgPercentage >= state.target) {
+          kpiElig.textContent = 'Safe Zone';
+          kpiElig.className = 'kpi-value text-ok';
+          kpiBadge.innerHTML = '<span class="text-ok">✓ Hall Ticket Guaranteed</span>';
+        } else if (avgPercentage >= 65) {
+          kpiElig.textContent = 'Condonation Zone';
+          kpiElig.className = 'kpi-value text-warn';
+          kpiBadge.innerHTML = '<span class="text-warn">⚠ Medical Fine Required</span>';
+        } else {
+          kpiElig.textContent = 'Detention Risk';
+          kpiElig.className = 'kpi-value text-bad';
+          kpiBadge.innerHTML = '<span class="text-bad">✕ Critical Deficit (&lt;65%)</span>';
+        }
+
+        // KPI 2: Overall Cushion
+        const marginInfo = calculateBunkMargin(totalAttended, totalConducted, state.target);
+        const marginVal = $('#kpiMarginValue');
+        const marginSub = $('#kpiMarginSub');
+        if (marginInfo.canBunk) {
+          marginVal.textContent = `Can Bunk ${marginInfo.count} Classes`;
+          marginVal.className = 'kpi-value text-ok';
+          marginSub.textContent = `Safe to maintain >= ${state.target}%`;
+        } else {
+          marginVal.textContent = `Must Attend ${marginInfo.count} Classes`;
+          marginVal.className = 'kpi-value text-bad';
+          marginSub.textContent = `Consecutive classes to reach ${state.target}%`;
+        }
+
+        // KPI 3: Today's Summary
+        const todaysClasses = d.todaysClasses || [];
+        const presentToday = todaysClasses.filter(c => /present/i.test(String(c.status || ''))).length;
+        $('#kpiTodayCount').textContent = `${todaysClasses.length} Scheduled`;
+        $('#kpiTodaySummary').innerHTML = `<span class="${presentToday > 0 ? 'text-ok' : 'text-muted'}">${presentToday} Marked Present Today</span>`;
+
+        // Controls
+        $('#targetSlider').value = state.target;
+        $('#targetBadge').textContent = `${state.target}%`;
+        $('#toggleTtCheck').checked = state.includeTT;
+      }
+
+      // ── TAB 1: SUBJECTS & SIMULATOR RENDERER ─────────────────────────────────
+      function renderSubjects() {
+        const container = $('#subjectsContainer');
+        const printBody = $('#printableReportBody');
+        container.innerHTML = '';
+        if (printBody) printBody.innerHTML = '';
+
+        if (!state.data || !state.data.attendance) {
+          container.innerHTML = '<div class="empty-state">No attendance records found.</div>';
+          return;
+        }
+
+        const rawList = state.data.attendance.filter(s => state.includeTT || isOfficialSubject(s));
+        $('#subjectCountBadge').textContent = rawList.length;
+
+        // Apply Search and Filters
+        const query = state.subjectSearchQuery.trim().toLowerCase();
+        const filteredList = rawList.filter(s => {
+          const sim = state.simulations[s.code] || { extraAttended: 0, extraBunked: 0 };
+          const effAtt = (s.attended || 0) + sim.extraAttended;
+          const effCond = (s.conducted || 0) + sim.extraAttended + sim.extraBunked;
+          const effPct = effCond > 0 ? (effAtt / effCond) * 100 : (+s.percentage || 0);
+
+          // Search match
+          const nameMatch = (s.subjectName || '').toLowerCase().includes(query) || (s.code || '').toLowerCase().includes(query);
+          if (!nameMatch) return false;
+
+          // Filter match
+          if (state.subjectFilter === 'risk') return effPct < state.target;
+          if (state.subjectFilter === 'safe') return effPct >= state.target;
+          if (state.subjectFilter === 'high') return effPct >= 85;
+          return true;
+        });
+
+        if (filteredList.length === 0) {
+          container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>No matching subjects found.</p></div>';
+          return;
+        }
+
+        filteredList.forEach(s => {
+          const sim = state.simulations[s.code] || { extraAttended: 0, extraBunked: 0 };
+          const effectiveAtt = (s.attended || 0) + sim.extraAttended;
+          const effectiveCond = (s.conducted || 0) + sim.extraAttended + sim.extraBunked;
+          const effectivePct = effectiveCond > 0 ? (effectiveAtt / effectiveCond) * 100 : (+s.percentage || 0);
+          const colorClass = getStatusColorClass(effectivePct, state.target);
+          const margin = calculateBunkMargin(effectiveAtt, effectiveCond, state.target);
+          const hasSimulation = (sim.extraAttended > 0 || sim.extraBunked > 0);
+
+          const card = document.createElement('div');
+          card.className = `subject-card is-${colorClass}`;
+
+          let advisorText = '';
+          if (margin.canBunk) {
+            advisorText = margin.count === 0
+              ? `Right at ${state.target}%. Missing 1 class will drop you into deficit!`
+              : `Safe! You can safely miss next <b>${margin.count}</b> class${margin.count === 1 ? '' : 'es'} and stay >= ${state.target}%.`;
+          } else {
+            advisorText = `Action needed! Must attend next <b>${margin.count}</b> class${margin.count === 1 ? '' : 'es'} consecutively to hit ${state.target}%.`;
+          }
+
+          card.innerHTML = `
+            <div class="subj-header">
+              <div class="subj-title-group">
+                <h3>${escapeHtml(s.subjectName)}</h3>
+                <div class="subj-meta-row">
+                  <span class="code-pill">${escapeHtml(s.code)}</span>
+                  <span>${effectiveAtt} / ${effectiveCond} Classes</span>
+                  ${s.gemsPendingSync ? '<span class="tag-chip tag-live" title="Includes a class marked present today before server sync">+1 Today</span>' : ''}
+                </div>
+              </div>
+
+              <div class="subj-pct-group">
+                <div class="subj-pct text-${colorClass}">${effectivePct.toFixed(1)}%</div>
+                ${hasSimulation ? `<div class="subj-count text-muted" style="font-size:11px;">(Simulated)</div>` : ''}
+              </div>
+            </div>
+
+            <div class="progress-bar-wrap">
+              <div class="progress-fill bg-${colorClass}" style="width: ${Math.min(100, Math.max(0, effectivePct))}%"></div>
+              <div class="progress-target-notch" style="left: ${state.target}%" title="Target Notch: ${state.target}%"></div>
+            </div>
+
+            <div class="bunk-advisor text-${margin.canBunk ? 'ok' : 'bad'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                ${margin.canBunk 
+                  ? '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>' 
+                  : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'}
+              </svg>
+              <span>${advisorText}</span>
+            </div>
+
+            <!-- What-if simulation interactive strip -->
+            <div class="sim-strip">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="text-muted" style="font-weight:600;">What-If Simulator:</span>
+                ${hasSimulation ? `<span class="sim-badge">+${sim.extraAttended} Attended / +${sim.extraBunked} Missed</span>` : ''}
+              </div>
+
+              <div class="sim-controls">
+                <button class="sim-btn add-att" data-action="sim-attend" data-code="${escapeHtml(s.code)}" title="Simulate attending next class">+1 Attend</button>
+                <button class="sim-btn add-bunk" data-action="sim-bunk" data-code="${escapeHtml(s.code)}" title="Simulate missing next class">+1 Miss</button>
+                ${hasSimulation ? `<button class="sim-btn" data-action="sim-reset" data-code="${escapeHtml(s.code)}" style="color:var(--text-faint);">Reset</button>` : ''}
+              </div>
+            </div>
+          `;
+
+          container.appendChild(card);
+
+          // Populate printable report table row
+          if (printBody) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${escapeHtml(s.subjectName)}</td>
+              <td>${escapeHtml(s.code)}</td>
+              <td>${effectiveAtt}</td>
+              <td>${effectiveCond}</td>
+              <td><b>${effectivePct.toFixed(1)}%</b></td>
+              <td>${effectivePct >= state.target ? 'Eligible' : effectivePct >= 65 ? 'Condonation' : 'Detained'}</td>
+            `;
+            printBody.appendChild(tr);
+          }
+        });
+      }
+
+      // ── TAB 2: TODAY'S SCHEDULE RENDERER ─────────────────────────────────────
+      function renderTodayClasses() {
+        const container = $('#todayClassesContainer');
+        const pillsGroup = $('#todayStatusPillsGroup');
+        container.innerHTML = '';
+        pillsGroup.innerHTML = '';
+
+        if (!state.data) return;
+        const classes = (state.data.todaysClasses || []).slice().sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+        $('#todayCountBadge').textContent = classes.length;
+
+        // Date Display
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+        $('#todayDateTitle').textContent = `Today's Schedule — ${now.toLocaleDateString('en-US', options)}`;
+
+        if (!classes.length) {
+          container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg><p>No classes scheduled for today. Enjoy your day off!</p></div>';
+          return;
+        }
+
+        // Count statuses
+        let presentCount = 0;
+        let absentCount = 0;
+        let permissionCount = 0;
+        let scheduledCount = 0;
+
+        // Current time for highlighting happening-now class
+        const currentHours = now.getHours();
+        const currentMins = now.getMinutes();
+        const currentTotalMinutes = currentHours * 60 + currentMins;
+
+        classes.forEach((cls, idx) => {
+          const st = String(cls.status || 'Scheduled').trim();
+          let badgeClass = 'status-scheduled';
+          let iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>';
+
+          if (/present/i.test(st)) {
+            badgeClass = 'status-present';
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><polyline points="20 6 9 17 4 12"/></svg>';
+            presentCount++;
+          } else if (/absent/i.test(st)) {
+            badgeClass = 'status-absent';
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+            absentCount++;
+          } else if (/permission/i.test(st)) {
+            badgeClass = 'status-permission';
+            iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            permissionCount++;
+          } else {
+            scheduledCount++;
+          }
+
+          // Check if period is active (e.g. within approx 55 mins of class start)
+          const timeMatch = /^(\d{1,2}):(\d{2})/.exec(cls.time || '');
+          let isCurrentPeriod = false;
+          if (timeMatch) {
+            const classStartMin = parseInt(timeMatch[1], 10) * 60 + parseInt(timeMatch[2], 10);
+            if (currentTotalMinutes >= classStartMin && currentTotalMinutes < (classStartMin + 55)) {
+              isCurrentPeriod = true;
+            }
+          }
+
+          const card = document.createElement('div');
+          card.className = `class-timeline-card ${isCurrentPeriod ? 'is-current' : ''}`;
+          card.innerHTML = `
+            <div class="class-time-slot">
+              <span class="time-main">${format12Hour(cls.time)}</span>
+              <span class="time-period">Period ${idx + 1}</span>
+            </div>
+
+            <div class="class-info">
+              <div class="subj-title">${escapeHtml(cls.subjectName || 'Subject')}</div>
+              <div class="subj-details">
+                ${cls.code ? `<span><span class="code-pill">${escapeHtml(cls.code)}</span></span>` : ''}
+                ${cls.facultyName ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${escapeHtml(cls.facultyName)}</span>` : ''}
+                ${cls.roomNo ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>Room ${escapeHtml(cls.roomNo)}</span>` : ''}
+              </div>
+            </div>
+
+            <div>
+              <span class="status-badge ${badgeClass}">${iconSvg}<span>${st}</span></span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        // Populate Pills
+        if (presentCount > 0) pillsGroup.innerHTML += `<span class="tag-chip tag-live">${presentCount} Present</span>`;
+        if (absentCount > 0) pillsGroup.innerHTML += `<span class="tag-chip text-bad" style="border:1px solid var(--bad);">${absentCount} Absent</span>`;
+        if (permissionCount > 0) pillsGroup.innerHTML += `<span class="tag-chip text-warn" style="border:1px solid var(--warn);">${permissionCount} Permission</span>`;
+        if (scheduledCount > 0) pillsGroup.innerHTML += `<span class="tag-chip text-muted" style="border:1px solid var(--border);">${scheduledCount} Upcoming</span>`;
+      }
+
+      // ── TAB 3: WEEKLY TIMETABLE RENDERER ─────────────────────────────────────
+      function renderTimetable() {
+        const strip = $('#daySelectorStrip');
+        const container = $('#timetableClassesContainer');
+        strip.innerHTML = '';
+        container.innerHTML = '';
+
+        if (!state.data || !state.data.weeklyTimetable) {
+          container.innerHTML = '<div class="empty-state"><p>Timetable data not available from college portal.</p></div>';
+          return;
+        }
+
+        const wt = state.data.weeklyTimetable;
+
+        // Render Day Switcher Strip
+        DAYS_ORDER.forEach(day => {
+          const dayClasses = wt[day] || [];
+          const btn = document.createElement('button');
+          btn.className = 'day-btn';
+          btn.setAttribute('aria-selected', day === state.selectedDay ? 'true' : 'false');
+          btn.innerHTML = `
+            <span>${day.slice(0, 3)}</span>
+            <span class="day-count">${dayClasses.length} Class${dayClasses.length === 1 ? '' : 'es'}</span>
+          `;
+          btn.onclick = () => {
+            state.selectedDay = day;
+            renderTimetable();
+          };
+          strip.appendChild(btn);
+        });
+
+        // Render classes for currently selected day
+        const dayClasses = (wt[state.selectedDay] || []).slice().sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+
+        if (!dayClasses.length) {
+          container.innerHTML = `<div class="empty-state"><p>No classes scheduled on ${state.selectedDay}.</p></div>`;
+          return;
+        }
+
+        dayClasses.forEach((cls, idx) => {
+          const card = document.createElement('div');
+          card.className = 'class-timeline-card';
+          card.innerHTML = `
+            <div class="class-time-slot">
+              <span class="time-main">${format12Hour(cls.time)}</span>
+              <span class="time-period">Slot ${idx + 1}</span>
+            </div>
+
+            <div class="class-info">
+              <div class="subj-title">${escapeHtml(cls.subjectName || 'Subject')}</div>
+              <div class="subj-details">
+                ${cls.code ? `<span><span class="code-pill">${escapeHtml(cls.code)}</span></span>` : ''}
+                ${cls.facultyName ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${escapeHtml(cls.facultyName)}</span>` : ''}
+                ${cls.roomNo ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>Room ${escapeHtml(cls.roomNo)}</span>` : ''}
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // ── TAB 4: GOAL PLANNER & SEMESTER CALCULATOR ─────────────────────────────
+      function renderPlanner() {
+        if (!state.data) return;
+        const remaining = Math.max(0, parseInt($('#projRemainingInput').value, 10) || 0);
+        const goal = Math.min(95, Math.max(50, parseFloat($('#projGoalInput').value) || 75));
+
+        const pool = (state.data.attendance || []).filter(s => state.includeTT || isOfficialSubject(s));
+        let totalAtt = 0;
+        let totalCond = 0;
+        pool.forEach(s => {
+          totalAtt += (s.attended || 0);
+          totalCond += (s.conducted || 0);
+        });
+
+        const futureTotal = totalCond + remaining;
+        const targetDecimal = goal / 100;
+        const requiredTotalAtt = Math.ceil(targetDecimal * futureTotal);
+        const neededFromRemaining = Math.max(0, requiredTotalAtt - totalAtt);
+        const canBunkFromRemaining = Math.max(0, remaining - neededFromRemaining);
+
+        const resBox = $('#projectionResultBox');
+        if (neededFromRemaining > remaining) {
+          resBox.innerHTML = `
+            <div class="text-bad" style="font-weight:700;margin-bottom:4px;">Mathematically Impossible to Hit ${goal}%</div>
+            <div style="font-size:13px;color:var(--text-muted);">
+              Even if you attend all ${remaining} remaining classes without missing a single one, your final maximum attendance will cap at 
+              <b>${(((totalAtt + remaining) / futureTotal) * 100).toFixed(1)}%</b>.
+            </div>
+          `;
+        } else {
+          resBox.innerHTML = `
+            <div class="text-ok" style="font-weight:700;margin-bottom:6px;font-size:15px;">
+              Target ${goal}% is Achievable!
+            </div>
+            <div style="font-size:13px;line-height:1.6;color:var(--text-main);">
+              • Must attend at least <b>${neededFromRemaining}</b> out of the next <b>${remaining}</b> classes.<br>
+              • You can afford to miss at most <b>${canBunkFromRemaining}</b> classes during the remainder of the semester.<br>
+              • Final projected total: <b>${totalAtt + neededFromRemaining} / ${futureTotal} classes (${goal}%)</b>.
+            </div>
+          `;
+        }
+      }
+
+      // ── MASTER RENDER DISPATCHER ─────────────────────────────────────────────
+      function renderAll() {
+        renderHeroDashboard();
+        renderSubjects();
+        renderTodayClasses();
+        renderTimetable();
+        renderPlanner();
+
+        // Update relative timestamp
+        if (state.lastFetchTime) {
+          const mins = Math.round((Date.now() - state.lastFetchTime) / 60000);
+          $('#lastUpdatedStamp').textContent = mins < 1 ? 'Updated just now' : `Updated ${mins} min ago`;
+        }
+      }
+
+      // ── TAB SWITCHING LOGIC ──────────────────────────────────────────────────
+      function switchTab(targetTab) {
+        state.activeTab = targetTab;
+
+        // Desktop tabs
+        $$('.tab-pill').forEach(btn => {
+          btn.setAttribute('aria-selected', btn.dataset.tab === targetTab ? 'true' : 'false');
+        });
+
+        // Mobile tabs
+        $$('.mobile-nav-item').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tab === targetTab);
+        });
+
+        // Show/hide sections
+        $('#tabSubjectsView').hidden = (targetTab !== 'subjects');
+        $('#tabTodayView').hidden = (targetTab !== 'today');
+        $('#tabTimetableView').hidden = (targetTab !== 'timetable');
+        $('#tabPlannerView').hidden = (targetTab !== 'planner');
+
+        // Scroll top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Tab Event Listeners
+      $$('.tab-pill').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+      $$('.mobile-nav-item').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      // ── CONTROLLER CONTROLS (TARGET SLIDER, SEARCH, FILTERS) ──────────────────
+      $('#targetSlider').addEventListener('input', (e) => {
+        state.target = parseInt(e.target.value, 10);
+        store('mitsTarget', state.target);
+        $('#targetBadge').textContent = `${state.target}%`;
+        renderHeroDashboard();
+        renderSubjects();
+      });
+
+      $('#toggleTtCheck').addEventListener('change', (e) => {
+        state.includeTT = e.target.checked;
+        store('mitsIncludeTT', state.includeTT ? '1' : '0');
+        renderAll();
+      });
+
+      $('#subjectSearchInput').addEventListener('input', (e) => {
+        state.subjectSearchQuery = e.target.value;
+        renderSubjects();
+      });
+
+      $$('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          $$('.filter-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          state.subjectFilter = chip.dataset.filter;
+          renderSubjects();
+        });
+      });
+
+      // Planner inputs
+      $('#projRemainingInput').addEventListener('input', renderPlanner);
+      $('#projGoalInput').addEventListener('input', renderPlanner);
+
+      // What-If simulation button clicks inside subject cards
+      $('#subjectsContainer').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const code = btn.dataset.code;
+        if (!code) return;
+
+        if (!state.simulations[code]) {
+          state.simulations[code] = { extraAttended: 0, extraBunked: 0 };
+        }
+
+        if (action === 'sim-attend') {
+          state.simulations[code].extraAttended++;
+        } else if (action === 'sim-bunk') {
+          state.simulations[code].extraBunked++;
+        } else if (action === 'sim-reset') {
+          delete state.simulations[code];
+        }
+
+        renderHeroDashboard();
+        renderSubjects();
+      });
+
+      // ── API & DATA FETCHING ──────────────────────────────────────────────────
+      function showAuthenticatedView() {
+        $('#loginView').hidden = true;
+        $('#mainAppView').hidden = false;
+        $('#mobileNavBar').hidden = false;
+        $('#refreshBtn').hidden = false;
+        $('#printBtn').hidden = false;
+        $('#logoutBtn').hidden = false;
+        renderAll();
+      }
+
+      async function fetchAttendanceData(credentials, isDemo = false) {
+        const submitBtn = $('#submitLoginBtn');
+        const refreshBtn = $('#refreshBtn');
+        const errorBox = $('#loginErrorBox');
+        const errorText = $('#loginErrorText');
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (refreshBtn) refreshBtn.querySelector('svg').classList.add('spin');
+        errorBox.hidden = true;
+
+        try {
+          const endpoint = isDemo ? '/api/demo' : '/api/data';
+          const options = isDemo
+            ? { method: 'GET' }
+            : {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials)
+              };
+
+          const response = await fetch(endpoint, options);
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok) {
+            throw new Error(data.error || `Server responded with status ${response.status}`);
+          }
+
+          // Save state & cache
+          state.data = data;
+          state.credentials = credentials;
+          state.lastFetchTime = Date.now();
+          state.simulations = {}; // clear past simulations on fresh sync
+
+          if (!isDemo && credentials) {
+            sessionStorage.setItem('mitsCred', JSON.stringify(credentials));
+            if ($('#rememberCheck').checked) {
+              store('mitsCred', JSON.stringify(credentials));
+            }
+          }
+          store('mitsCache', JSON.stringify({ data, at: state.lastFetchTime }));
+
+          showAuthenticatedView();
+          showToast(isDemo ? 'Loaded Demo Student Profile!' : 'Attendance synchronized with GEMS!', 'ok');
+
+        } catch (err) {
+          console.error(err);
+          errorText.textContent = err.message || 'Unable to fetch data from GEMS portal. Please check login credentials.';
+          errorBox.hidden = false;
+          showToast(err.message || 'Failed to sync with college portal.', 'bad');
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+          if (refreshBtn) refreshBtn.querySelector('svg').classList.remove('spin');
+        }
+      }
+
+      // ── AUTH & FORM LISTENERS ────────────────────────────────────────────────
+      $('#loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = $('#usernameInput').value.trim();
+        const password = $('#passwordInput').value.trim();
+        if (!username || !password) return;
+        fetchAttendanceData({ username, password }, false);
+      });
+
+      $('#demoModeBtn').addEventListener('click', () => {
+        fetchAttendanceData({ username: 'demo', password: 'demo' }, true);
+      });
+
+      $('#refreshBtn').addEventListener('click', () => {
+        if (state.credentials) {
+          fetchAttendanceData(state.credentials, state.data?.isDemo || false);
+        } else if (state.data?.isDemo) {
+          fetchAttendanceData({ username: 'demo', password: 'demo' }, true);
+        }
+      });
+
+      $('#logoutBtn').addEventListener('click', () => {
+        try {
+          sessionStorage.clear();
+          remove('mitsCred');
+          remove('mitsCache');
+        } catch (e) {}
+        window.location.reload();
+      });
+
+      // Password toggle reveal
+      $('#togglePasswordBtn').addEventListener('click', () => {
+        const input = $('#passwordInput');
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+      });
+
+      // Print / Export Report
+      $('#printBtn').addEventListener('click', () => {
+        window.print();
+      });
+
+      // ── STRING ESCAPE HELPER (XSS PROTECTION) ────────────────────────────────
+      function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ── INITIALIZATION ON PAGE LOAD ──────────────────────────────────────────
+      (function initApp() {
+        // Check for cached attendance data first for instantaneous render
+        try {
+          const cached = JSON.parse(read('mitsCache') || 'null');
+          if (cached && cached.data) {
+            state.data = cached.data;
+            state.lastFetchTime = cached.at || Date.now();
+            showAuthenticatedView();
+          }
+        } catch (e) {}
+
+        // Check for saved credentials
+        let savedCred = null;
+        try {
+          savedCred = JSON.parse(sessionStorage.getItem('mitsCred') || read('mitsCred') || 'null');
+        } catch (e) {}
+
+        if (savedCred && savedCred.username && savedCred.password) {
+          $('#usernameInput').value = savedCred.username;
+          fetchAttendanceData(savedCred, savedCred.username === 'demo');
+        }
+      })();
+
+      // Background clock tick for real-time period updates
+      setInterval(() => {
+        if (state.data && !$('#mainAppView').hidden) {
+          renderHeroDashboard();
+          renderTodayClasses();
+        }
+      }, 60000);
+
+    })();
+  </script>
+</body>
+</html>
