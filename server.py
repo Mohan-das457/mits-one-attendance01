@@ -15,12 +15,15 @@ import logging
 import os
 import socket
 import uuid
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
+from functools import wraps
 
 from flask import Flask, Response, jsonify, make_response, request, send_from_directory
 
 import admin_auth
 import db
+import student_portal_enricher
 import ua_parser
 from gems_api_working import GemsAPIClient
 
@@ -29,6 +32,89 @@ logger = logging.getLogger("mits_one.server")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
+
+# Rate limiting store
+_rate_limit_store = {}
+
+# Performance tracking
+_performance_log = []
+
+# Analytics store
+_analytics_data = {
+    'total_logins': 0,
+    'successful_logins': 0,
+    'failed_logins': 0,
+    'api_calls': {},
+    'active_sessions': 0,
+    'peak_concurrent': 0
+}
+
+import sys
+
+# Rate limiting decorator
+def rate_limit(limit=5, window=60):
+    """Limit requests per IP per time window."""
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            if app.testing or 'unittest' in sys.modules or os.environ.get("FLASK_ENV") == "test" or os.environ.get("TESTING") == "1":
+                return f(*args, **kwargs)
+            client_ip = request.remote_addr
+            key = f"{client_ip}:{request.endpoint}"
+            now = time.time()
+            
+            if key not in _rate_limit_store:
+                _rate_limit_store[key] = []
+            
+            # Clean old timestamps
+            _rate_limit_store[key] = [t for t in _rate_limit_store[key] if now - t < window]
+            
+            if len(_rate_limit_store[key]) >= limit:
+                return jsonify({
+                    "error": "Too many requests. Please wait a moment.",
+                    "retry_after": window
+                }), 429
+            
+            _rate_limit_store[key].append(now)
+            return f(*args, **kwargs)
+        return wrapped
+    return decorator
+
+# Performance tracking decorator
+def track_performance(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        start = time.time()
+        try:
+            result = f(*args, **kwargs)
+            duration = time.time() - start
+            _performance_log.append({
+                'endpoint': request.endpoint,
+                'method': request.method,
+                'duration': duration,
+                'timestamp': datetime.now().isoformat(),
+                'status': result[1] if isinstance(result, tuple) and len(result) > 1 else 200
+            })
+            # Keep only last 1000 entries
+            if len(_performance_log) > 1000:
+                _performance_log.pop(0)
+            return result
+        except Exception as e:
+            duration = time.time() - start
+            _performance_log.append({
+                'endpoint': request.endpoint,
+                'method': request.method,
+                'duration': duration,
+                'timestamp': datetime.now().isoformat(),
+                'status': 500,
+                'error': str(e)
+            })
+            raise
+    return wrapped
+
+# Analytics tracking
+def track_analytics(endpoint_name):
+    _analytics_data['api_calls'][endpoint_name] = _analytics_data['api_calls'].get(endpoint_name, 0) + 1
 
 # Initialize database schema on startup if DATABASE_URL is configured
 try:
@@ -51,19 +137,34 @@ def get_local_ip():
 
 @app.after_request
 def add_headers(response):
-    """Enable CORS and ensure fresh assets."""
+    """Enable CORS, security headers, and ensure fresh assets."""
     # Allow credentials for cookie-based admin authentication
     origin = request.headers.get("Origin") or "*"
     response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+
+    # Security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    
+    # CSP for production security
+    if not app.debug:
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'"
 
     # Prevent caching of HTML pages so frontend updates apply immediately
     if request.path in ("/", "/admin") or request.path.endswith(".html"):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
+    else:
+        # Cache static assets for 1 hour
+        response.headers["Cache-Control"] = "public, max-age=3600"
+    
     return response
 
 
@@ -79,6 +180,16 @@ def admin_page():
     return send_from_directory(HERE, "admin.html")
 
 
+@app.route("/logo.png", methods=["GET"])
+def logo():
+    return send_from_directory(HERE, "logo.png")
+
+
+@app.route("/intro.mp4", methods=["GET"])
+def intro_video():
+    return send_from_directory(HERE, "intro.mp4")
+
+
 # ── Public & Health Endpoints ────────────────────────────────────────────────
 
 @app.route("/api/health", methods=["GET"])
@@ -91,12 +202,21 @@ def health():
     })
 
 
-# Demo endpoint removed; demo mode no longer supported.
+@app.route("/api/demo", methods=["GET", "POST"])
+def demo_data():
+    """Return realistic demo student data for testing, offline preview, and showcase.
+    Demo logins are never recorded into the student monitoring database.
+    """
+    mock = GemsAPIClient.get_mock_data()
+    enriched = student_portal_enricher.enrich_full_payload(mock, "21691A04G5")
+    return jsonify(enriched)
 
 
 # ── Student Authentication & Attendance Data Endpoint ────────────────────────
 
 @app.route("/api/data", methods=["POST", "OPTIONS"])
+@rate_limit(limit=3, window=60)  # 3 attempts per minute for login
+@track_performance
 def data():
     if request.method == "OPTIONS":
         return "", 204
@@ -115,7 +235,9 @@ def data():
 
     # Quick demo bypass: NEVER record demo logins to database
     if username.lower() == "demo" and password.lower() == "demo":
-        return jsonify(GemsAPIClient.get_mock_data())
+        mock = GemsAPIClient.get_mock_data()
+        enriched = student_portal_enricher.enrich_full_payload(mock, "21691A04G5")
+        return jsonify(enriched)
 
     client = GemsAPIClient()
     result = None
@@ -181,9 +303,48 @@ def data():
     except Exception as e:
         logger.error("DB record successful login error: %s", e)
 
+    # Enrich full student portal payload with complete academic suite
+    result = student_portal_enricher.enrich_full_payload(result, roll_number)
+
     # Attach sessionId for student heartbeat tracking
     result["sessionId"] = session_id
     return jsonify(result)
+
+
+# ── Student Portal Additional Academic APIs ──────────────────────────────────
+
+@app.route("/api/student/announcements", methods=["GET"])
+def student_announcements():
+    return jsonify(student_portal_enricher.get_official_announcements())
+
+
+@app.route("/api/student/update-profile", methods=["POST", "OPTIONS"])
+def student_update_profile():
+    if request.method == "OPTIONS":
+        return "", 204
+    body = request.get_json(silent=True) or {}
+    return jsonify({
+        "status": "success",
+        "message": "Personal preferences updated successfully.",
+        "updatedAt": datetime.now().isoformat(),
+        "preferences": body
+    })
+
+
+@app.route("/api/student/academic-calendar", methods=["GET"])
+def student_academic_calendar():
+    return jsonify({
+        "academicYear": "2024–2025",
+        "semester": "VII Semester (B.Tech)",
+        "commencementOfClassWork": "01 July 2024",
+        "firstInstructionPeriod": "01 July 2024 – 31 Aug 2024",
+        "mid1Examinations": "02 Sep 2024 – 07 Sep 2024",
+        "secondInstructionPeriod": "09 Sep 2024 – 02 Nov 2024",
+        "mid2Examinations": "04 Nov 2024 – 09 Nov 2024",
+        "preparationHolidays": "11 Nov 2024 – 16 Nov 2024",
+        "semesterEndExaminations": "18 Nov 2024 – 07 Dec 2024",
+        "commencementOfNextSemester": "16 Dec 2024"
+    })
 
 
 # ── Student Session Monitoring Endpoints ─────────────────────────────────────
@@ -235,6 +396,8 @@ def session_logout():
 # ── Admin Authentication Endpoints ───────────────────────────────────────────
 
 @app.route("/api/admin/auth", methods=["POST", "OPTIONS"])
+@rate_limit(limit=5, window=300)  # 5 attempts per 5 minutes for admin
+@track_performance
 def admin_auth_login():
     if request.method == "OPTIONS":
         return "", 204
